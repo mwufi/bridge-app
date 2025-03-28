@@ -24,7 +24,7 @@ export function InputContainer({ onSend, setIsTyping }: InputContainerProps) {
       type: 'text',
       text: inputText.trim()
     }]);
-    
+
     setInputText('');
     impactLight();
   };
@@ -36,16 +36,10 @@ export function InputContainer({ onSend, setIsTyping }: InputContainerProps) {
 
   return (
     <View style={styles.inputContainer}>
-      <TextInput
-        style={styles.input}
-        value={inputText}
-        onChangeText={handleChangeText}
-        placeholder="Message AI..."
-        placeholderTextColor="#666"
+      <TextInput style={styles.input} value={inputText} onChangeText={handleChangeText} placeholder="Message AI..." placeholderTextColor="#666"
         multiline
-        maxLength={1000}
-      />
-      <Pressable 
+        maxLength={1000} />
+      <Pressable
         onPress={handleSend}
         style={({ pressed }) => [
           styles.sendButton,
@@ -64,9 +58,9 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 16,
     alignItems: 'flex-end',
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#333',
-    backgroundColor: '#000',
+    backgroundColor: 'transparent',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   input: {
     flex: 1,
@@ -75,6 +69,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
     paddingHorizontal: 16,
     paddingVertical: 8,
+    paddingTop: 10,
     backgroundColor: '#1a1a1a',
     borderRadius: 20,
     color: '#fff',
