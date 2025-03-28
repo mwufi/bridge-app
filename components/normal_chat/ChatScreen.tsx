@@ -8,9 +8,9 @@ import {
 } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { InputContainer } from '@/components/chat/InputContainer';
-import { TypingIndicator } from '@/components/chat/TypingIndicator';
-import { ChatHeader } from '@/components/chat/ChatHeader';
+import { InputContainer } from '@/components/normal_chat/InputContainer';
+import { TypingIndicator } from '@/components/normal_chat/TypingIndicator';
+import { ChatHeader } from '@/components/normal_chat/ChatHeader';
 
 const emptyStateImage = require('@/assets/images/empty-state.png');
 

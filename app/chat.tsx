@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import ChatScreen from '@/components/chat/ChatScreen';
+import ChatScreen from '@/components/genz_chat/ChatScreen';
 
 export default function Chat() {
     const { taskId, title } = useLocalSearchParams();
