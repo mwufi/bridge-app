@@ -1,18 +1,14 @@
 import React, { useState, useRef } from 'react';
 import {
-  View as RNView,
   StyleSheet,
-  TextInput,
   FlatList,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   SafeAreaView,
 } from 'react-native';
 import { Text, View } from '@/components/Themed';
-import { BlurView } from 'expo-blur';
-import { FontAwesome } from '@expo/vector-icons';
-import { impactLight } from '../../lib/haptics';
+import { InputContainer } from '@/components/chat/InputContainer';
+import { TypingIndicator } from '@/components/chat/TypingIndicator';
 
 type Message = {
   id: string;
@@ -23,24 +19,37 @@ type Message = {
 
 export default function ChatScreen() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
-  const sendMessage = async () => {
-    if (!inputText.trim()) return;
+  // Scroll to bottom helper
+  const scrollToBottom = () => {
+    if (flatListRef.current) {
+      flatListRef.current.scrollToEnd({ animated: true });
+    }
+  };
+
+  // Effect to scroll when typing indicator appears
+  React.useEffect(() => {
+    if (isTyping) {
+      // Small delay to ensure the footer is rendered
+      setTimeout(scrollToBottom, 100);
+    }
+  }, [isTyping]);
+
+  const handleSend = (content: { type: string; text?: string; file?: string }[]) => {
+    const textContent = content.find(item => item.type === 'text');
+    if (!textContent?.text) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: inputText.trim(),
+      text: textContent.text,
       isUser: true,
       timestamp: new Date(),
     };
 
     setMessages(prev => [...prev, userMessage]);
-    setInputText('');
     setIsTyping(true);
-    impactLight();
 
     // Simulate AI response
     setTimeout(() => {
@@ -76,35 +85,15 @@ export default function ChatScreen() {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <MessageBubble message={item} />}
         contentContainerStyle={styles.messageList}
-        onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
+        onContentSizeChange={scrollToBottom}
+        ListFooterComponent={isTyping ? (
+          <View style={styles.typingIndicator}>
+            <TypingIndicator />
+          </View>
+        ) : null}
       />
-      
-      {isTyping && (
-        <BlurView intensity={50} style={styles.typingIndicator}>
-          <Text style={styles.typingText}>AI is typing...</Text>
-        </BlurView>
-      )}
 
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          value={inputText}
-          onChangeText={setInputText}
-          placeholder="Message AI..."
-          placeholderTextColor="#666"
-          multiline
-          maxLength={1000}
-        />
-        <Pressable 
-          onPress={sendMessage}
-          style={({ pressed }) => [
-            styles.sendButton,
-            { opacity: pressed ? 0.7 : 1 }
-          ]}
-        >
-          <FontAwesome name="send" size={20} color="#007AFF" />
-        </Pressable>
-      </View>
+      <InputContainer onSend={handleSend} />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -141,39 +130,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
   },
-  inputContainer: {
-    flexDirection: 'row',
-    padding: 16,
-    paddingBottom: 16,
-    alignItems: 'flex-end',
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#333',
-    backgroundColor: '#000',
-  },
-  input: {
-    flex: 1,
-    backgroundColor: '#1C1C1E',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginRight: 8,
-    color: '#fff',
-    fontSize: 16,
-    maxHeight: 100,
-  },
-  sendButton: {
-    padding: 8,
-  },
   typingIndicator: {
-    position: 'absolute',
-    bottom: 80,
-    left: 20,
-    borderRadius: 16,
-    padding: 8,
-    paddingHorizontal: 12,
-  },
-  typingText: {
-    color: '#fff',
-    fontSize: 14,
+    margin: 8,
+    marginLeft: 16,
+    alignSelf: 'flex-start',
+    borderRadius: 12,
+    backgroundColor: '#333',
   },
 });
