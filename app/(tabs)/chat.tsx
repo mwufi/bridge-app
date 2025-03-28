@@ -75,25 +75,25 @@ export default function ChatScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <MessageBubble message={item} />}
-        contentContainerStyle={styles.messageList}
-        onContentSizeChange={scrollToBottom}
-        ListFooterComponent={isTyping ? (
-          <View style={styles.typingIndicator}>
-            <TypingIndicator />
-          </View>
-        ) : null}
-      />
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <MessageBubble message={item} />}
+          contentContainerStyle={styles.messageList}
+          onContentSizeChange={scrollToBottom}
+          ListFooterComponent={isTyping ? (
+            <View style={styles.typingIndicator}>
+              <TypingIndicator />
+            </View>
+          ) : null}
+        />
 
-      <InputContainer onSend={handleSend} />
+        <InputContainer onSend={handleSend} />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -131,10 +131,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   typingIndicator: {
-    margin: 8,
-    marginLeft: 16,
+    maxWidth: '80%',
+    marginTop: 4,
+    marginBottom: 20,
+    marginRight: 16,
+    paddingVertical: 2,
+    paddingHorizontal: 4,
+    opacity: 0.7,
     alignSelf: 'flex-start',
-    borderRadius: 12,
+    borderRadius: 8,
     backgroundColor: '#333',
   },
 });
