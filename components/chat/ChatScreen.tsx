@@ -69,7 +69,10 @@ export default function ChatScreen() {
       styles.messageBubble,
       message.isUser ? styles.userBubble : styles.aiBubble
     ]}>
-      <Text style={styles.messageText}>{message.text}</Text>
+      <Text style={[
+        styles.messageText,
+        { color: message.isUser ? '#FFFFFF' : '#2C3E50' }
+      ]}>{message.text}</Text>
     </View>
   );
 
@@ -102,7 +105,7 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#F5F7FA',
   },
   keyboardView: {
     flex: 1,
@@ -117,17 +120,17 @@ const styles = StyleSheet.create({
     marginVertical: 4,
   },
   userBubble: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#7C4DFF',
     alignSelf: 'flex-end',
     borderBottomRightRadius: 4,
+    marginVertical: 12,
   },
   aiBubble: {
-    backgroundColor: '#333',
+    backgroundColor: '#E8EAF6',
     alignSelf: 'flex-start',
     borderBottomLeftRadius: 4,
   },
   messageText: {
-    color: '#fff',
     fontSize: 16,
   },
   typingIndicator: {
@@ -140,6 +143,6 @@ const styles = StyleSheet.create({
     opacity: 0.7,
     alignSelf: 'flex-start',
     borderRadius: 8,
-    backgroundColor: '#333',
+    backgroundColor: '#E8EAF6',
   },
 });

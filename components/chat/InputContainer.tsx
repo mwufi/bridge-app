@@ -36,7 +36,7 @@ export function InputContainer({ onSend, setIsTyping }: InputContainerProps) {
 
   return (
     <View style={styles.inputContainer}>
-      <TextInput style={styles.input} value={inputText} onChangeText={handleChangeText} placeholder="Message AI..." placeholderTextColor="#666"
+      <TextInput style={styles.input} value={inputText} onChangeText={handleChangeText} placeholder="Message AI..." placeholderTextColor="#9E9E9E"
         multiline
         maxLength={1000} />
       <Pressable
@@ -46,7 +46,7 @@ export function InputContainer({ onSend, setIsTyping }: InputContainerProps) {
           { opacity: pressed ? 0.7 : 1 }
         ]}
       >
-        <FontAwesome name="send" size={20} color="#007AFF" />
+        <FontAwesome name="send" size={20} color="#7C4DFF" />
       </Pressable>
     </View>
   );
@@ -55,12 +55,20 @@ export function InputContainer({ onSend, setIsTyping }: InputContainerProps) {
 const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
-    padding: 16,
-    paddingBottom: 16,
+    padding: 8,
+    paddingBottom: 8,
     alignItems: 'flex-end',
-    backgroundColor: 'transparent',
+    backgroundColor: '#F5F7FA',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
   input: {
     flex: 1,
@@ -70,17 +78,33 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     paddingTop: 10,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
-    color: '#fff',
+    color: '#2C3E50',
     fontSize: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   sendButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
 });
