@@ -5,10 +5,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
+  Image,
 } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { InputContainer } from '@/components/chat/InputContainer';
 import { TypingIndicator } from '@/components/chat/TypingIndicator';
+
+const emptyStateImage = require('@/assets/images/empty-state.png');
 
 type Message = {
   id: string;
@@ -36,6 +39,20 @@ export default function ChatScreen() {
       setTimeout(scrollToBottom, 100);
     }
   }, [isTyping]);
+
+  const EmptyChat = () => (
+    <View style={styles.emptyContainer}>
+      <Image
+        source={emptyStateImage}
+        style={styles.emptyImage}
+        resizeMode="contain"
+      />
+      <Text style={styles.emptyTitle}>Start a Conversation</Text>
+      <Text style={styles.emptyText}>
+        Send a message to begin chatting with your AI assistant
+      </Text>
+    </View>
+  );
 
   const handleSend = (content: { type: string; text?: string; file?: string }[]) => {
     const textContent = content.find(item => item.type === 'text');
@@ -82,21 +99,25 @@ export default function ChatScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
-        <FlatList
-          ref={flatListRef}
-          data={messages}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <MessageBubble message={item} />}
-          contentContainerStyle={styles.messageList}
-          onContentSizeChange={scrollToBottom}
-          ListFooterComponent={isTyping ? (
-            <View style={styles.typingIndicator}>
-              <TypingIndicator />
-            </View>
-          ) : null}
-        />
+        {messages.length > 0 ? (
+          <FlatList
+            ref={flatListRef}
+            data={messages}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => <MessageBubble message={item} />}
+            contentContainerStyle={styles.messageList}
+            onContentSizeChange={scrollToBottom}
+            ListFooterComponent={isTyping ? (
+              <View style={styles.typingIndicator}>
+                <TypingIndicator />
+              </View>
+            ) : null}
+          />
+        ) : (
+          <EmptyChat />
+        )}
 
-        <InputContainer onSend={handleSend} />
+        <InputContainer onSend={handleSend} setIsTyping={setIsTyping} />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -144,5 +165,28 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     borderRadius: 8,
     backgroundColor: '#E8EAF6',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+  },
+  emptyImage: {
+    width: '80%',
+    height: 200,
+    marginBottom: 24,
+  },
+  emptyTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#2C3E50',
+    marginBottom: 12,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#7F8C8D',
+    textAlign: 'center',
+    lineHeight: 24,
   },
 });
