@@ -1,6 +1,5 @@
 import React from 'react';
-import { StyleSheet, SafeAreaView } from 'react-native';
-import { Text, View } from '@/components/Themed';
+import { StyleSheet } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import ChatScreen from '@/components/chat/ChatScreen';
 
