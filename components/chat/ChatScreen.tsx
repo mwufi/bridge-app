@@ -4,12 +4,13 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   Image,
 } from 'react-native';
 import { Text, View } from '@/components/Themed';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { InputContainer } from '@/components/chat/InputContainer';
 import { TypingIndicator } from '@/components/chat/TypingIndicator';
+import { ChatHeader } from '@/components/chat/ChatHeader';
 
 const emptyStateImage = require('@/assets/images/empty-state.png');
 
@@ -47,9 +48,9 @@ export default function ChatScreen() {
         style={styles.emptyImage}
         resizeMode="contain"
       />
-      <Text style={styles.emptyTitle}>Start a Conversation</Text>
+      <Text style={styles.emptyTitle}>Hi there!</Text>
       <Text style={styles.emptyText}>
-        Send a message to begin chatting with your AI assistant
+        What's on your mind?
       </Text>
     </View>
   );
@@ -94,7 +95,12 @@ export default function ChatScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <ChatHeader
+        name="Ara"
+        status="Online"
+        isGroup={false}
+      />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
@@ -117,7 +123,7 @@ export default function ChatScreen() {
           <EmptyChat />
         )}
 
-        <InputContainer onSend={handleSend} setIsTyping={setIsTyping} />
+        <InputContainer onSend={handleSend} />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -171,6 +177,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 32,
+    backgroundColor: '#F5F7FA',
   },
   emptyImage: {
     width: '80%',
