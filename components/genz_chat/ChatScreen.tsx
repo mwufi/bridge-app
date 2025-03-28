@@ -23,98 +23,116 @@ type Message = {
 };
 
 export default function GenZChatScreen() {
-    const [userMessage, setUserMessage] = useState<string>('');
-    const [assistantMessage, setAssistantMessage] = useState<string>('');
-    const [inputText, setInputText] = useState<string>('');
     const [messages, setMessages] = useState<Message[]>([]);
+    const [inputText, setInputText] = useState<string>('');
     const inputRef = useRef<TextInput>(null);
-    const assistantScrollRef = useRef<ScrollView>(null);
-    const userScrollRef = useRef<ScrollView>(null);
+    const scrollViewRef = useRef<ScrollView>(null);
+    const keyboardHeight = useRef(new Animated.Value(0));
 
     // Auto focus on mount
     useEffect(() => {
         setTimeout(() => {
             inputRef.current?.focus();
         }, 100);
+
+        // Add keyboard event listeners
+        const keyboardWillShow = Keyboard.addListener(
+            Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+            (event) => {
+                Animated.timing(keyboardHeight.current, {
+                    toValue: event.endCoordinates.height,
+                    duration: 250,
+                    useNativeDriver: false,
+                }).start();
+            }
+        );
+
+        const keyboardWillHide = Keyboard.addListener(
+            Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+            () => {
+                Animated.timing(keyboardHeight.current, {
+                    toValue: 0,
+                    duration: 250,
+                    useNativeDriver: false,
+                }).start();
+            }
+        );
+
+        return () => {
+            keyboardWillShow.remove();
+            keyboardWillHide.remove();
+        };
     }, []);
 
-    // Scroll to bottom when messages change
+    // Scroll to bottom when messages change or keyboard height changes
     useEffect(() => {
-        if (userMessage) {
-            userScrollRef.current?.scrollToEnd({ animated: true });
-        }
-    }, [userMessage]);
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, [messages, keyboardHeight.current]);
 
-    useEffect(() => {
-        if (assistantMessage) {
-            assistantScrollRef.current?.scrollToEnd({ animated: true });
-        }
-    }, [assistantMessage]);
+    // Animation values for new messages
+    const messageAnimations = useRef<{ [key: string]: { opacity: Animated.Value; scale: Animated.Value } }>({});
 
-    // Animation values
-    const userOpacity = new Animated.Value(0);
-    const assistantOpacity = new Animated.Value(0);
-    const userScale = new Animated.Value(0.8);
-    const assistantScale = new Animated.Value(0.8);
+    const animateNewMessage = (messageId: string) => {
+        const opacity = new Animated.Value(0);
+        const scale = new Animated.Value(0.8);
+        messageAnimations.current[messageId] = { opacity, scale };
 
-    // Simulate typing effect
-    useEffect(() => {
-        if (userMessage) {
-            Animated.parallel([
-                Animated.timing(userOpacity, {
-                    toValue: 1,
-                    duration: 300,
-                    useNativeDriver: true,
-                }),
-                Animated.spring(userScale, {
-                    toValue: 1,
-                    friction: 8,
-                    tension: 40,
-                    useNativeDriver: true,
-                }),
-            ]).start();
-        }
-    }, [userMessage]);
-
-    useEffect(() => {
-        if (assistantMessage) {
-            Animated.parallel([
-                Animated.timing(assistantOpacity, {
-                    toValue: 1,
-                    duration: 300,
-                    useNativeDriver: true,
-                }),
-                Animated.spring(assistantScale, {
-                    toValue: 1,
-                    friction: 8,
-                    tension: 40,
-                    useNativeDriver: true,
-                }),
-            ]).start();
-        }
-    }, [assistantMessage]);
+        Animated.parallel([
+            Animated.timing(opacity, {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true,
+            }),
+            Animated.spring(scale, {
+                toValue: 1,
+                friction: 8,
+                tension: 40,
+                useNativeDriver: true,
+            }),
+        ]).start();
+    };
 
     const handleSend = () => {
         if (!inputText.trim()) return;
 
-        setUserMessage(inputText);
+        const newMessage: Message = {
+            id: Date.now().toString(),
+            text: inputText,
+            isUser: true,
+            timestamp: new Date(),
+        };
+
+        setMessages(prev => [...prev, newMessage]);
         setInputText('');
         inputRef.current?.focus();
+
+        // Scroll after the message is added
+        setTimeout(() => {
+            scrollViewRef.current?.scrollToEnd({ animated: true });
+        }, 100);
 
         // Simulate AI response
         setTimeout(() => {
             const responses = [
                 "literally me rn",
-                "bestie you're so right",
+                "omg bestie I totally get what you're saying! that's exactly how I've been feeling lately and it's like nobody else understands but you just GET IT fr fr",
                 "periodt",
-                "slay",
+                "slay queen! you're absolutely spitting facts and I'm here for every single word of it. keep that energy because you're literally changing lives rn",
                 "no cap detected",
-                "based and redpilled",
+                "based and redpilled fr fr, you're speaking straight facts and everyone needs to hear this. the way you just explained that was absolutely perfect",
                 "fr fr no cap",
-                "vibe",
+                "vibe check passed 100%, you're literally radiating the most immaculate energy rn and I'm totally here for it. keep blessing us with these god tier takes",
             ];
             const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-            setAssistantMessage(randomResponse);
+
+            const assistantMessage: Message = {
+                id: (Date.now() + 1).toString(),
+                text: randomResponse,
+                isUser: false,
+                timestamp: new Date(),
+            };
+
+            setMessages(prev => [...prev, assistantMessage]);
         }, 1000);
     };
 
@@ -124,52 +142,45 @@ export default function GenZChatScreen() {
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.keyboardView}
             >
-                <View style={styles.assistantSection}>
+                <View style={styles.chatContainer}>
                     <View style={styles.labelContainer}>
                         <View style={styles.labelBackground}>
                             <Text style={styles.label}>ARA</Text>
                         </View>
                     </View>
-                    <ScrollView
-                        ref={assistantScrollRef}
-                        style={styles.scrollView}
+                    <Animated.ScrollView
+                        ref={scrollViewRef}
+                        style={[
+                            styles.scrollView,
+                            {
+                                paddingBottom: keyboardHeight.current,
+                            },
+                        ]}
                         contentContainerStyle={styles.scrollContent}
                     >
-                        <Animated.View style={[
-                            styles.messageContainer,
-                            styles.assistantMessage,
-                            {
-                                opacity: assistantOpacity,
-                                transform: [{ scale: assistantScale }],
-                            },
-                        ]}>
-                            <Text style={styles.messageText}>{assistantMessage}</Text>
-                        </Animated.View>
-                    </ScrollView>
-                </View>
+                        {messages.map((message) => {
+                            if (!messageAnimations.current[message.id]) {
+                                animateNewMessage(message.id);
+                            }
+                            const { opacity, scale } = messageAnimations.current[message.id];
 
-                <View style={styles.userSection}>
-                    <View style={styles.labelContainer}>
-                        <View style={styles.labelBackground}>
-                            <Text style={styles.label}>YOU</Text>
-                        </View>
-                    </View>
-                    <ScrollView
-                        ref={userScrollRef}
-                        style={styles.scrollView}
-                        contentContainerStyle={styles.scrollContent}
-                    >
-                        <Animated.View style={[
-                            styles.messageContainer,
-                            styles.userMessage,
-                            {
-                                opacity: userOpacity,
-                                transform: [{ scale: userScale }],
-                            },
-                        ]}>
-                            <Text style={styles.messageText}>{userMessage}</Text>
-                        </Animated.View>
-                    </ScrollView>
+                            return (
+                                <Animated.View
+                                    key={message.id}
+                                    style={[
+                                        styles.messageContainer,
+                                        message.isUser ? styles.userMessage : styles.assistantMessage,
+                                        {
+                                            opacity,
+                                            transform: [{ scale }],
+                                        },
+                                    ]}
+                                >
+                                    <Text style={styles.messageText}>{message.text}</Text>
+                                </Animated.View>
+                            );
+                        })}
+                    </Animated.ScrollView>
                 </View>
 
                 <View style={styles.inputContainer}>
@@ -206,14 +217,7 @@ const styles = StyleSheet.create({
     keyboardView: {
         flex: 1,
     },
-    assistantSection: {
-        flex: 1,
-        backgroundColor: '#000000',
-        borderBottomWidth: 1,
-        borderBottomColor: '#333333',
-        position: 'relative',
-    },
-    userSection: {
+    chatContainer: {
         flex: 1,
         backgroundColor: '#000000',
         position: 'relative',
@@ -240,11 +244,12 @@ const styles = StyleSheet.create({
     },
     scrollView: {
         flex: 1,
-        paddingTop: 60, // Add space for the floating label
+        paddingTop: 60,
     },
     scrollContent: {
         padding: 20,
         flexGrow: 1,
+        paddingBottom: 40,
     },
     messageContainer: {
         padding: 20,
