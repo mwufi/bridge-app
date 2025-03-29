@@ -13,6 +13,19 @@ import {
     ScrollView,
     StyleSheet,
 } from 'react-native';
+import {
+    useFonts,
+    Fredoka_400Regular,
+    Fredoka_600SemiBold,
+} from '@expo-google-fonts/fredoka';
+import {
+    SpaceGrotesk_400Regular,
+    SpaceGrotesk_600SemiBold,
+} from '@expo-google-fonts/space-grotesk';
+import {
+    Outfit_400Regular,
+    Outfit_600SemiBold,
+} from '@expo-google-fonts/outfit';
 
 interface PhoneIdScreenProps {
     onNext: (phoneNumber: string) => void;
@@ -56,6 +69,19 @@ const PhoneIdScreen = ({ onNext, tagline, picture }: PhoneIdScreenProps) => {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [showPrivacy, setShowPrivacy] = useState(false);
     const [showTerms, setShowTerms] = useState(false);
+
+    const [fontsLoaded] = useFonts({
+        Fredoka_400Regular,
+        Fredoka_600SemiBold,
+        SpaceGrotesk_400Regular,
+        SpaceGrotesk_600SemiBold,
+        Outfit_400Regular,
+        Outfit_600SemiBold,
+    });
+
+    if (!fontsLoaded) {
+        return <View style={styles.fullScreen} />;
+    }
 
     const handleSubmit = () => {
         const rawNumber = phoneNumber.replace(/[^\d]/g, '');
@@ -179,106 +205,134 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     logoText: {
-        fontSize: 48,
+        fontSize: 64,
         fontWeight: 'bold',
         color: '#FFFFFF',
-        fontFamily: Platform.select({ ios: 'System', android: 'sans-serif' }),
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
+        fontFamily: 'Fredoka_600SemiBold',
+        textShadowColor: 'rgba(255, 90, 95, 0.25)',
+        textShadowOffset: { width: 2, height: 2 },
+        textShadowRadius: 4,
+        letterSpacing: 2,
     },
     tagline: {
-        fontSize: 18,
+        fontSize: 24,
         color: '#FFFFFF',
-        marginTop: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
+        fontFamily: 'Outfit_600SemiBold',
+        textShadowColor: 'rgba(0, 0, 0, 0.2)',
+        textShadowOffset: { width: 1, height: 1 },
+        textShadowRadius: 2,
     },
     inputContainer: {
         flex: 1,
         flexGrow: 1,
         flexShrink: 0,
-        minHeight: 200, // Add minimum height to prevent shrinking
-        maxHeight: 300, // Add maximum height to prevent growing
+        minHeight: 200,
+        maxHeight: 300,
         width: '100%',
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        borderRadius: 16,
-        padding: 20,
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        borderRadius: 24,
+        padding: 24,
         marginBottom: Platform.OS === 'ios' ? 20 : 0,
+        shadowColor: 'rgba(255, 90, 95, 0.2)',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+        elevation: 8,
     },
     inputLabel: {
-        fontSize: 24,
-        fontWeight: '600',
-        marginBottom: 20,
-        fontFamily: Platform.select({ ios: 'System', android: 'sans-serif' }),
+        fontSize: 28,
+        fontWeight: '800',
+        marginBottom: 24,
+        fontFamily: 'SpaceGrotesk_600SemiBold',
+        color: '#2D3436',
+        textTransform: 'uppercase',
+        letterSpacing: 1,
     },
     phoneInput: {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#FFFFFF',
-        borderRadius: 8,
+        borderRadius: 16,
         overflow: 'hidden',
+        borderWidth: 2,
+        borderColor: '#E0E0E0',
+        shadowColor: 'rgba(255, 90, 95, 0.1)',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 4,
     },
     countryCode: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 12,
+        padding: 16,
         borderRightWidth: 1,
-        borderRightColor: '#E5E5E5',
+        borderRightColor: '#E0E0E0',
+        backgroundColor: '#F8F8F8',
     },
     flag: {
-        width: 24,
-        height: 16,
-        marginRight: 8,
+        width: 28,
+        height: 20,
+        marginRight: 12,
     },
     countryCodeText: {
-        fontSize: 16,
+        fontSize: 18,
+        fontFamily: 'SpaceGrotesk_600SemiBold',
+        color: '#2D3436',
     },
     numberInput: {
         flex: 1,
-        padding: 12,
-        fontSize: 16,
+        padding: 16,
+        fontSize: 20,
+        fontFamily: 'SpaceGrotesk_400Regular',
+        color: '#2D3436',
     },
     termsText: {
         textAlign: 'center',
         color: '#666',
         fontSize: 14,
-        marginTop: 16,
-        marginBottom: 20,
+        marginTop: 20,
+        marginBottom: 24,
+        lineHeight: 20,
+        fontFamily: 'Outfit_400Regular',
     },
     termsLink: {
-        color: '#000',
+        color: '#FF5A5F',
         textDecorationLine: 'underline',
+        fontFamily: 'Outfit_600SemiBold',
     },
     submitButton: {
-        backgroundColor: '#1a365d',
-        borderRadius: 25,
-        padding: 16,
+        backgroundColor: '#FF5A5F',
+        borderRadius: 30,
+        padding: 18,
         width: '100%',
         alignItems: 'center',
+        shadowColor: '#FF5A5F',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 6,
     },
     submitButtonDisabled: {
         opacity: 0.5,
     },
     submitButtonText: {
         color: '#FFFFFF',
-        fontSize: 18,
-        fontWeight: '600',
+        fontSize: 20,
+        fontFamily: 'SpaceGrotesk_600SemiBold',
+        textTransform: 'uppercase',
+        letterSpacing: 1,
     },
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
         justifyContent: 'flex-end',
     },
     modalContent: {
         backgroundColor: '#FFFFFF',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        padding: 20,
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        padding: 24,
         maxHeight: '80%',
     },
     modalScroll: {
@@ -287,19 +341,28 @@ const styles = StyleSheet.create({
     modalText: {
         fontSize: 16,
         lineHeight: 24,
-        marginBottom: 20,
+        marginBottom: 24,
+        color: '#2D3436',
+        fontFamily: 'Outfit_400Regular',
     },
     modalButton: {
-        backgroundColor: '#1a365d',
-        borderRadius: 25,
-        padding: 16,
+        backgroundColor: '#FF5A5F',
+        borderRadius: 30,
+        padding: 18,
         alignItems: 'center',
-        marginTop: 20,
+        marginTop: 24,
+        shadowColor: '#FF5A5F',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 6,
     },
     modalButtonText: {
         color: '#FFFFFF',
-        fontSize: 16,
-        fontWeight: '600',
+        fontSize: 18,
+        fontFamily: 'SpaceGrotesk_600SemiBold',
+        textTransform: 'uppercase',
+        letterSpacing: 1,
     },
 });
 
