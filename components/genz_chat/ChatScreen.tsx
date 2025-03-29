@@ -9,9 +9,12 @@ import {
     KeyboardAvoidingView,
     Keyboard,
     ScrollView,
+    Modal,
 } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { FontAwesome } from '@expo/vector-icons';
+import ProfileScreen from '@/components/profile/ProfileScreen';
 
 const { height } = Dimensions.get('window');
 
@@ -25,6 +28,7 @@ type Message = {
 export default function GenZChatScreen() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputText, setInputText] = useState<string>('');
+    const [showProfile, setShowProfile] = useState(false);
     const inputRef = useRef<TextInput>(null);
     const scrollViewRef = useRef<ScrollView>(null);
     const keyboardHeight = useRef(new Animated.Value(0));
@@ -143,10 +147,20 @@ export default function GenZChatScreen() {
                 style={styles.keyboardView}
             >
                 <View style={styles.chatContainer}>
-                    <View style={styles.labelContainer}>
-                        <View style={styles.labelBackground}>
-                            <Text style={styles.label}>ARA</Text>
+                    <View style={styles.header}>
+                        <View style={styles.labelContainer}>
+                            <View style={styles.labelBackground}>
+                                <Text style={styles.label}>ARA</Text>
+                            </View>
                         </View>
+                        <TouchableOpacity
+                            style={styles.profileButton}
+                            onPress={() => setShowProfile(true)}
+                        >
+                            <View style={styles.profilePicContainer}>
+                                <FontAwesome name="user-circle" size={32} color="#FFFFFF" />
+                            </View>
+                        </TouchableOpacity>
                     </View>
                     <Animated.ScrollView
                         ref={scrollViewRef}
@@ -205,6 +219,14 @@ export default function GenZChatScreen() {
                     </TouchableOpacity>
                 </View>
             </KeyboardAvoidingView>
+
+            <Modal
+                visible={showProfile}
+                animationType="slide"
+                presentationStyle="fullScreen"
+            >
+                <ProfileScreen onClose={() => setShowProfile(false)} />
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -222,12 +244,17 @@ const styles = StyleSheet.create({
         backgroundColor: '#000000',
         position: 'relative',
     },
-    labelContainer: {
-        position: 'absolute',
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingTop: 20,
+        paddingHorizontal: 20,
+        paddingBottom: 10,
         backgroundColor: 'transparent',
-        top: 20,
-        left: 20,
-        zIndex: 1,
+    },
+    labelContainer: {
+        backgroundColor: 'transparent',
     },
     labelBackground: {
         backgroundColor: 'rgba(0, 0, 0, 0.9)',
@@ -303,5 +330,16 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '900',
         letterSpacing: 1,
+    },
+    profileButton: {
+        padding: 5,
+    },
+    profilePicContainer: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#FF3366',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 }); 

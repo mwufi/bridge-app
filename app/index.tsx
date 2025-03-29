@@ -23,7 +23,7 @@ export default function App() {
         return null; // Or a loading screen
     }
 
-    return isOnboardingComplete ? (
+    return false ? (
         <GenZChatScreen />
     ) : (
         <OnboardingScreen onComplete={handleOnboardingComplete} />
