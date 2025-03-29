@@ -59,6 +59,12 @@ const config = ({ config }: ConfigContext): ExpoConfig => {
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "expo-contacts",
+        {
+          "contactsPermission": "Allow $(PRODUCT_NAME) to access your contacts."
+        }
       ]
     ],
     "experiments": {

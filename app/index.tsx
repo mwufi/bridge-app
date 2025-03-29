@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Storage } from '@/utils/storage';
-import OnboardingScreen from '@/components/onboarding/OnboardingScreen';
+import DynamicOnboarding from '@/components/onboarding/DynamicOnboarding';
 import GenZChatScreen from '@/components/genz_chat/ChatScreen';
+import { Text } from 'react-native';
 
 export default function App() {
+    const isDebug = true;
     const [isOnboardingComplete, setIsOnboardingComplete] = useState<boolean | null>(null);
 
     useEffect(() => {
@@ -15,17 +17,22 @@ export default function App() {
         setIsOnboardingComplete(complete);
     };
 
-    const handleOnboardingComplete = () => {
+    const handleOnboardingComplete = async () => {
+        await Storage.setOnboardingComplete(true); // Persist the completion
         setIsOnboardingComplete(true);
     };
 
     if (isOnboardingComplete === null) {
-        return null; // Or a loading screen
+        return <Text>Loading...</Text>; // Simple loading state
     }
 
-    return false ? (
+    if (isDebug) {
+        return <DynamicOnboarding onComplete={handleOnboardingComplete} />
+    }
+
+    return isOnboardingComplete ? (
         <GenZChatScreen />
     ) : (
-        <OnboardingScreen onComplete={handleOnboardingComplete} />
+        <DynamicOnboarding onComplete={handleOnboardingComplete} />
     );
-} 
+}
