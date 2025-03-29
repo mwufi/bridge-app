@@ -98,7 +98,7 @@ const PhoneIdScreen = ({ onNext, tagline, picture }: PhoneIdScreenProps) => {
     return (
         <View style={styles.fullScreen}>
             <ImageBackground
-                source={picture || require('../../assets/images/onboarding-1.png')}
+                source={picture || require('@/assets/images/onboarding-1.png')}
                 style={styles.backgroundImage}
                 resizeMode="cover"
             />
@@ -118,7 +118,7 @@ const PhoneIdScreen = ({ onNext, tagline, picture }: PhoneIdScreenProps) => {
                         <View style={styles.phoneInput}>
                             <View style={styles.countryCode}>
                                 <Image
-                                    source={require('../../assets/images/onboarding-2.png')}
+                                    source={require('@/assets/images/onboarding-2.png')}
                                     style={styles.flag}
                                 />
                                 <Text style={styles.countryCodeText}>+1</Text>

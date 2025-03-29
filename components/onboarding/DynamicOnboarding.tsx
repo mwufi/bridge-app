@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, Text, Button, StyleSheet, TextInput, Image, ImageBackground, KeyboardAvoidingView, Platform, Dimensions, Pressable, Modal } from 'react-native';
-import PhoneIdScreen from './PhoneId';
+import PhoneIdScreen from './screens/PhoneId';
+import NameInput from './screens/NameInput';
+import BirthdayInput from './screens/BirthdayInput';
+import UsernameInput from './screens/UsernameInput';
+import InfoScreen from './screens/InfoScreen';
+import PersonalitySelect from './screens/PersonalitySelect';
 
 interface OnboardingScreenProps {
     onComplete: () => void;
@@ -49,29 +54,62 @@ const SignupScreen = ({ buttonText, onComplete }: SignupScreenProps) => (
 
 type OnboardingStep =
     | { id: number; type: 'phoneId'; tagline: string; picture: string }
-    | { id: number; type: 'welcome'; title: string; description: string }
-    | { id: number; type: 'features'; items: string[] }
-    | { id: number; type: 'signup'; buttonText: string };
+    | { id: number; type: 'name'; picture: string }
+    | { id: number; type: 'birthday'; picture: string }
+    | { id: number; type: 'username'; picture: string }
+    | { id: number; type: 'info'; title: string; description: string; buttonLabel?: string; picture: string }
+    | { id: number; type: 'personality'; picture: string };
 
 const getOnboardingData = async (): Promise<OnboardingStep[]> => {
+    // This could be fetched from an API for A/B testing
     const data: OnboardingStep[] = [
-        { id: 1, type: 'phoneId', tagline: 'better ai, better life', picture: require('../../assets/images/onboarding-1.png') },
-        { id: 2, type: 'phoneId', tagline: 'seondary', picture: require('../../assets/images/onboarding-3.png') },
         {
-            id: 3,
-            type: 'welcome',
-            title: 'Welcome!',
-            description: "Let's get started."
+            id: 1,
+            type: 'phoneId',
+            tagline: 'find your place',
+            picture: require('@/assets/images/onboarding-1.png')
         },
-        {
-            id: 4,
-            type: 'features',
-            items: ['Feature 1', 'Feature 2', 'Feature 3']
-        },
+        // {
+        //     id: 2,
+        //     type: 'name',
+        //     picture: require('@/assets/images/onboarding-2.png')
+        // },
+        // {
+        //     id: 3,
+        //     type: 'birthday',
+        //     picture: require('@/assets/images/onboarding-3.png')
+        // },
+        // {
+        //     id: 4,
+        //     type: 'username',
+        //     picture: require('@/assets/images/onboarding-4.png')
+        // },
         {
             id: 5,
-            type: 'signup',
-            buttonText: 'Sign Up Now'
+            type: 'info',
+            title: 'Meet Ara',
+            description: 'Ara is a digital companion, a pet you can talk to. Or a super-intelligent AI that helps you get things done.',
+            picture: require('@/assets/images/onboarding-5.png')
+        },
+        {
+            id: 6,
+            type: 'info',
+            title: 'Growing Features',
+            description: "Right now Ara doesn't have a lot of features. But we'll be adding more integrations, like email, Google Docs, Calendar, and more.",
+            picture: require('@/assets/images/onboarding-6.png')
+        },
+        {
+            id: 7,
+            type: 'info',
+            title: 'Two Modes',
+            description: 'Ara comes in two formats: search & converse. Use search when you want a quick tool. Use converse when you want deep conversation.',
+            buttonLabel: 'got it',
+            picture: require('@/assets/images/onboarding-7.png')
+        },
+        {
+            id: 8,
+            type: 'personality',
+            picture: require('@/assets/images/onboarding-2.png')
         }
     ];
     return data;
@@ -82,7 +120,13 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
     const [currentStep, setCurrentStep] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [phoneNumber, setPhoneNumber] = useState<string | null>(null);
+    const [userData, setUserData] = useState({
+        phone: '',
+        name: '',
+        birthday: '',
+        username: '',
+        personality: ''
+    });
 
     useEffect(() => {
         const fetchOnboardingData = async () => {
@@ -98,43 +142,66 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
         fetchOnboardingData();
     }, []);
 
-    const handleNext = (phone?: string) => {
-        if (phone) {
-            setPhoneNumber(phone);
+    const handleNext = (data?: any) => {
+        if (data) {
+            setUserData(prev => ({ ...prev, ...data }));
         }
+
         if (currentStep < onboardingData.length - 1) {
             setCurrentStep(currentStep + 1);
+        } else {
+            // Here you could send the collected userData to your backend
+            console.log('Completed onboarding with data:', userData);
+            onComplete();
         }
-    };
-
-    const handleComplete = () => {
-        onComplete();
     };
 
     const renderScreen = (screenConfig: OnboardingStep) => {
         switch (screenConfig.type) {
             case 'phoneId':
-                return <PhoneIdScreen onNext={handleNext} {...screenConfig} />;
-            case 'welcome':
                 return (
-                    <WelcomeScreen
+                    <PhoneIdScreen
+                        onNext={(phone) => handleNext({ phone })}
+                        tagline={screenConfig.tagline}
+                        picture={screenConfig.picture}
+                    />
+                );
+            case 'name':
+                return (
+                    <NameInput
+                        onNext={(name) => handleNext({ name })}
+                        picture={screenConfig.picture}
+                    />
+                );
+            case 'birthday':
+                return (
+                    <BirthdayInput
+                        onNext={(birthday) => handleNext({ birthday })}
+                        picture={screenConfig.picture}
+                    />
+                );
+            case 'username':
+                return (
+                    <UsernameInput
+                        onNext={(username) => handleNext({ username })}
+                        picture={screenConfig.picture}
+                    />
+                );
+            case 'info':
+                return (
+                    <InfoScreen
+                        onNext={() => handleNext()}
                         title={screenConfig.title}
                         description={screenConfig.description}
-                        onNext={() => handleNext()}
+                        buttonLabel={screenConfig.buttonLabel}
+                        picture={screenConfig.picture}
                     />
                 );
-            case 'features':
+            case 'personality':
                 return (
-                    <FeaturesScreen
-                        items={screenConfig.items}
-                        onNext={() => handleNext()}
-                    />
-                );
-            case 'signup':
-                return (
-                    <SignupScreen
-                        buttonText={screenConfig.buttonText}
-                        onComplete={handleComplete}
+                    <PersonalitySelect
+                        onNext={(personality) => handleNext({ personality })}
+                        picture={screenConfig.picture}
                     />
                 );
         }
@@ -153,20 +220,24 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
     }
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.container}>
             {renderScreen(onboardingData[currentStep])}
-            <Text style={styles.stepIndicator}>
-                Step {currentStep + 1} of {onboardingData.length}
-            </Text>
-        </ScrollView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        flexGrow: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+        flex: 1,
+        backgroundColor: '#000', // Dark background for the screens
+    },
+    stepIndicator: {
+        position: 'absolute',
+        bottom: 10,
+        alignSelf: 'center',
+        fontSize: 14,
+        color: 'rgba(255, 255, 255, 0.6)',
+        fontFamily: 'SpaceGrotesk_400Regular',
     },
     screen: {
         width: '100%',
@@ -181,11 +252,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         textAlign: 'center',
         marginBottom: 20,
-    },
-    stepIndicator: {
-        marginTop: 20,
-        fontSize: 14,
-        color: '#666',
     },
     fullScreen: {
         flex: 1,
