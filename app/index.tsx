@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
 import { Storage } from '@/utils/storage';
 import DynamicOnboarding from '@/components/onboarding/DynamicOnboarding';
 import GenZChatScreen from '@/components/genz_chat/ChatScreen';
@@ -18,8 +16,6 @@ import {
     Outfit_400Regular,
     Outfit_600SemiBold,
 } from '@expo-google-fonts/outfit';
-
-const Stack = createStackNavigator();
 
 export default function App() {
     const isDebug = true;
