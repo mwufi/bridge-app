@@ -8,44 +8,45 @@ import { FontAwesome } from '@expo/vector-icons';
 
 import { ThemedText } from '@/components/ThemedText';
 import { TabsFilter, TabType } from '@/components/TabsFilter';
+import { Header } from '@/components/typography/header';
 
 // Mock data for conversations
 const conversations = [
-  { 
-    id: '1', 
-    botName: 'Ara', 
-    lastMessage: 'I found some interesting articles about that topic. Would you like me to share them?', 
+  {
+    id: '1',
+    botName: 'Ara',
+    lastMessage: 'I found some interesting articles about that topic. Would you like me to share them?',
     time: '10:45 AM',
     unread: 2,
     image: require('@/assets/images/icon.png'),
   },
-  { 
-    id: '2', 
-    botName: 'GenZ', 
+  {
+    id: '2',
+    botName: 'GenZ',
     lastMessage: `No cap, that's so based! Frfr.`,
     time: 'Yesterday',
     unread: 0,
     image: require('@/assets/images/icon.png'),
   },
-  { 
-    id: '3', 
-    botName: 'Poet', 
+  {
+    id: '3',
+    botName: 'Poet',
     lastMessage: 'Words dance upon the page, like stars upon the night sky...',
     time: 'Yesterday',
     unread: 1,
     image: require('@/assets/images/icon.png'),
   },
-  { 
-    id: '4', 
-    botName: 'Chef', 
+  {
+    id: '4',
+    botName: 'Chef',
     lastMessage: 'Would you like me to suggest a recipe for dinner tonight?',
     time: 'Monday',
     unread: 0,
     image: require('@/assets/images/icon.png'),
   },
-  { 
-    id: '5', 
-    botName: 'Friend', 
+  {
+    id: '5',
+    botName: 'Friend',
     lastMessage: 'How was your weekend? Did you get a chance to try that new restaurant?',
     time: 'Sunday',
     unread: 0,
@@ -86,8 +87,8 @@ export default function ChatInboxScreen() {
   };
 
   const renderConversationItem = ({ item }: { item: typeof conversations[0] }) => (
-    <TouchableOpacity 
-      style={styles.conversationItem} 
+    <TouchableOpacity
+      style={styles.conversationItem}
       onPress={() => handleConversationPress(item.id)}
     >
       <View style={styles.avatarContainer}>
@@ -98,14 +99,14 @@ export default function ChatInboxScreen() {
           </View>
         )}
       </View>
-      
+
       <View style={styles.conversationContent}>
         <View style={styles.conversationHeader}>
           <Text style={styles.botName}>{item.botName}</Text>
           <Text style={styles.timeStamp}>{item.time}</Text>
         </View>
-        <Text 
-          style={[styles.lastMessage, item.unread > 0 && styles.unreadMessage]} 
+        <Text
+          style={[styles.lastMessage, item.unread > 0 && styles.unreadMessage]}
           numberOfLines={1}
         >
           {item.lastMessage}
@@ -115,11 +116,11 @@ export default function ChatInboxScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={['left', 'right']}>
+    <SafeAreaView style={styles.container}>
       <StatusBar style="light" />
-      
-      <View style={[styles.header, { marginTop: Math.max(insets.top, 10) }]}>
-        <ThemedText style={styles.headerTitle}>Messages</ThemedText>
+
+      <View style={styles.header}>
+        <Header style={{ paddingLeft: 0 }}>Messages</Header>
         <TouchableOpacity style={styles.newChatButton} onPress={handleNewChatPress}>
           <FontAwesome name="pencil-square-o" size={20} color="#FFF" />
         </TouchableOpacity>

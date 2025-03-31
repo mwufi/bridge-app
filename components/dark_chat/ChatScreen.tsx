@@ -6,6 +6,7 @@ import {
   Platform,
   Image,
   View,
+  TextInput,
   Text,
   TouchableOpacity,
 } from 'react-native';
@@ -42,7 +43,7 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ id: string }>();
   const id = params.id || chatId;
-  
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [inputText, setInputText] = useState('');
@@ -113,7 +114,7 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
       // Get random response from the personality responses
       const responseArray = personalityResponses[id] || personalityResponses['1'];
       const randomResponse = responseArray[Math.floor(Math.random() * responseArray.length)];
-      
+
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: randomResponse,
@@ -158,29 +159,28 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <StatusBar style="light" />
-      
+
       {/* Chat Header */}
-      <View style={[styles.header, { paddingTop: Math.max(insets.top, 10) }]}>
+      <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={handleBack}>
           <FontAwesome name="chevron-left" size={20} color="#FFF" />
         </TouchableOpacity>
-        
+
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>{botData.name}</Text>
           <Text style={styles.headerSubtitle}>AI Assistant</Text>
         </View>
-        
+
         <TouchableOpacity style={styles.settingsButton} onPress={handleSettings}>
           <FontAwesome name="gear" size={20} color="#FFF" />
         </TouchableOpacity>
       </View>
-      
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
-        keyboardVerticalOffset={90}
       >
         {messages.length > 0 ? (
           <FlatList
@@ -189,15 +189,15 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
             keyExtractor={(item) => item.id}
             renderItem={({ item, index }) => (
               <View>
-                {(index === 0 || 
-                  new Date(item.timestamp).toDateString() !== 
+                {(index === 0 ||
+                  new Date(item.timestamp).toDateString() !==
                   new Date(messages[index - 1].timestamp).toDateString()) && (
-                  <View style={styles.dateContainer}>
-                    <Text style={styles.dateText}>
-                      {new Date(item.timestamp).toLocaleDateString()}
-                    </Text>
-                  </View>
-                )}
+                    <View style={styles.dateContainer}>
+                      <Text style={styles.dateText}>
+                        {new Date(item.timestamp).toLocaleDateString()}
+                      </Text>
+                    </View>
+                  )}
                 <MessageBubble message={item} />
               </View>
             )}
@@ -225,7 +225,7 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
           <TouchableOpacity style={styles.attachButton}>
             <FontAwesome name="plus" size={20} color="#888" />
           </TouchableOpacity>
-          
+
           <View style={styles.textInputContainer}>
             <TextInput
               style={styles.textInput}
@@ -236,12 +236,12 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
               multiline
             />
           </View>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={[
               styles.sendButton,
               !inputText.trim() && styles.sendButtonDisabled
-            ]} 
+            ]}
             onPress={handleSend}
             disabled={!inputText.trim()}
           >
@@ -249,7 +249,7 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-    </View>
+    </SafeAreaView>
   );
 }
 

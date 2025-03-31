@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  StyleSheet, 
-  ScrollView, 
-  Image, 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  TextInput, 
-  Modal, 
-  Pressable, 
-  KeyboardAvoidingView, 
+import {
+  StyleSheet,
+  ScrollView,
+  Image,
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  Modal,
+  KeyboardAvoidingView,
   Platform,
   Animated
 } from 'react-native';
@@ -22,6 +21,7 @@ import { FontAwesome } from '@expo/vector-icons';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { Header } from '@/components/typography/header';
 
 // Sample data for stories (frequently chatted bots)
 const stories = [
@@ -52,16 +52,16 @@ const todoItems = [
 
 // Sample news items
 const newsItems = [
-  { 
-    id: '1', 
-    title: 'New AI Research Shows Promising Results', 
+  {
+    id: '1',
+    title: 'New AI Research Shows Promising Results',
     source: 'Tech Daily',
     time: '2h ago',
     image: require('@/assets/images/icon.png')
   },
-  { 
-    id: '2', 
-    title: 'Study Shows Benefits of Daily Meditation', 
+  {
+    id: '2',
+    title: 'Study Shows Benefits of Daily Meditation',
     source: 'Health Weekly',
     time: '5h ago',
     image: require('@/assets/images/icon.png')
@@ -81,7 +81,7 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const [isInputModalVisible, setIsInputModalVisible] = useState(false);
   const [inputText, setInputText] = useState('');
-  
+
   // Animation values for visualizer
   const [visualizerHeights] = useState(
     [...Array(5)].map(() => new Animated.Value(5))
@@ -106,10 +106,10 @@ export default function HomeScreen() {
           ])
         );
       });
-      
+
       Animated.parallel(animations).start();
     }
-    
+
     return () => {
       visualizerHeights.forEach(anim => anim.stopAnimation());
     };
@@ -135,8 +135,8 @@ export default function HomeScreen() {
   };
 
   const renderTopicSuggestion = (item) => (
-    <TouchableOpacity 
-      key={item.id} 
+    <TouchableOpacity
+      key={item.id}
       style={styles.topicItem}
       onPress={() => handleStoryPress('1')} // Navigate to Ara with this topic
     >
@@ -152,15 +152,13 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={[styles.container]} edges={['top', 'left', 'right']}>
       <StatusBar style="light" />
-      <ScrollView 
-        style={styles.scrollView} 
+      <ScrollView
+        style={styles.scrollView}
         contentContainerStyle={[styles.content, { paddingTop: Math.max(insets.top, 10) }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Greeting section */}
-        <View style={styles.greetingContainer}>
-          <ThemedText style={styles.greeting}>Hey, Zen</ThemedText>
-        </View>
+        <Header>Hey, Zen</Header>
 
         {/* Stories section (Instagram-like) */}
         <View style={styles.storiesSection}>
@@ -195,18 +193,18 @@ export default function HomeScreen() {
                 <Text style={styles.streakText}>{userStats.streakDays} days</Text>
               </View>
             </View>
-            
+
             <View style={styles.progressBarContainer}>
               <View style={[styles.progressBar, { width: `${userStats.progress}%` }]} />
             </View>
-            
+
             <View style={styles.milestoneContainer}>
               <Text style={styles.milestoneText}>Next: {userStats.nextMilestone}</Text>
               <Text style={styles.percentageText}>{formatPercentage(userStats.progress)}</Text>
             </View>
           </View>
         </View>
-        
+
         {/* Todo List Section */}
         <View style={styles.todoSection}>
           <ThemedText style={styles.sectionTitle}>Tasks</ThemedText>
@@ -221,7 +219,7 @@ export default function HomeScreen() {
                   )}
                 </View>
                 <Text style={[
-                  styles.todoText, 
+                  styles.todoText,
                   item.completed && styles.todoCompleted
                 ]}>
                   {item.title}
@@ -234,11 +232,11 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
         </View>
-        
+
         {/* For You Section */}
         <View style={styles.forYouSection}>
           <ThemedText style={styles.sectionTitle}>For You</ThemedText>
-          
+
           {/* Topics sub-section */}
           <View style={styles.subsectionContainer}>
             <Text style={styles.subsectionTitle}>Topics to Explore</Text>
@@ -246,7 +244,7 @@ export default function HomeScreen() {
               {topicSuggestions.map(renderTopicSuggestion)}
             </View>
           </View>
-          
+
           {/* News sub-section */}
           <View style={styles.subsectionContainer}>
             <Text style={styles.subsectionTitle}>Latest News</Text>
@@ -263,7 +261,7 @@ export default function HomeScreen() {
               </TouchableOpacity>
             ))}
           </View>
-          
+
           {/* Friends Map placeholder */}
           <View style={styles.subsectionContainer}>
             <Text style={styles.subsectionTitle}>Updates from Friends</Text>
@@ -297,11 +295,11 @@ export default function HomeScreen() {
         onRequestClose={() => setIsInputModalVisible(false)}
       >
         <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
-        
+
         <View style={styles.modalContainer}>
           {/* Ara Animation Area */}
-          <TouchableOpacity 
-            style={styles.modalAraArea} 
+          <TouchableOpacity
+            style={styles.modalAraArea}
             activeOpacity={1}
             onPress={() => setIsInputModalVisible(false)}
           >
@@ -310,22 +308,22 @@ export default function HomeScreen() {
                 <Image source={require('@/assets/images/icon.png')} style={styles.araImage} />
               </View>
               <Text style={styles.araListeningText}>Ara is listening...</Text>
-              
+
               {/* Visualizer bars - animated */}
               <View style={styles.visualizerContainer}>
                 {visualizerHeights.map((height, index) => (
-                  <Animated.View 
-                    key={index} 
+                  <Animated.View
+                    key={index}
                     style={[
-                      styles.visualizerBar, 
+                      styles.visualizerBar,
                       { height, backgroundColor: `rgba(255, 51, 102, 0.8)` }
-                    ]} 
+                    ]}
                   />
                 ))}
               </View>
             </View>
           </TouchableOpacity>
-          
+
           {/* Input Area */}
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -342,14 +340,14 @@ export default function HomeScreen() {
                 multiline
               />
               <View style={styles.modalButtonRow}>
-                <TouchableOpacity 
-                  style={[styles.modalButton, styles.searchButton]} 
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.searchButton]}
                   onPress={handleInputSubmit}
                 >
                   <Text style={styles.buttonText}>Search</Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
-                  style={[styles.modalButton, styles.noteButton]} 
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.noteButton]}
                   onPress={handleInputSubmit}
                 >
                   <Text style={styles.buttonText}>Save as Note</Text>
@@ -373,16 +371,6 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingBottom: 100, // Space for persistent input
-  },
-  greetingContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 10,
-  },
-  greeting: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#fff',
   },
   sectionTitle: {
     fontSize: 18,

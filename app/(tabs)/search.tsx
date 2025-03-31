@@ -8,6 +8,7 @@ import { FontAwesome } from '@expo/vector-icons';
 
 import { ThemedText } from '@/components/ThemedText';
 import { TabsFilter, TabType } from '@/components/TabsFilter';
+import { Header } from '@/components/typography/header';
 
 // Mock data for search results
 const mockBots = [
@@ -62,8 +63,8 @@ export default function SearchScreen() {
     // Filter based on active tab
     if (activeTab === 'all' || activeTab === 'bots') {
       const filteredBots = mockBots.filter(
-        bot => bot.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-               bot.description.toLowerCase().includes(searchQuery.toLowerCase())
+        bot => bot.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          bot.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
       results = [...results, ...filteredBots.map(bot => ({ id: `bot-${bot.id}`, type: 'bot', data: bot }))];
     }
@@ -77,9 +78,9 @@ export default function SearchScreen() {
 
     if (activeTab === 'all' || activeTab === 'websites') {
       const filteredWebsites = mockWebsites.filter(
-        web => web.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-               web.url.toLowerCase().includes(searchQuery.toLowerCase()) ||
-               web.snippet.toLowerCase().includes(searchQuery.toLowerCase())
+        web => web.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          web.url.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          web.snippet.toLowerCase().includes(searchQuery.toLowerCase())
       );
       results = [...results, ...filteredWebsites.map(web => ({ id: `web-${web.id}`, type: 'website', data: web }))];
     }
@@ -92,8 +93,8 @@ export default function SearchScreen() {
     switch (item.type) {
       case 'bot':
         return (
-          <TouchableOpacity 
-            style={styles.resultItem} 
+          <TouchableOpacity
+            style={styles.resultItem}
             onPress={() => router.push(`/chat?id=${item.data.id}`)}
           >
             <Image source={item.data.image} style={styles.botImage} />
@@ -103,11 +104,11 @@ export default function SearchScreen() {
             </View>
           </TouchableOpacity>
         );
-      
+
       case 'message':
         return (
-          <TouchableOpacity 
-            style={styles.resultItem} 
+          <TouchableOpacity
+            style={styles.resultItem}
             onPress={() => router.push(`/chat?id=${item.data.botName.toLowerCase()}&message=${item.data.id}`)}
           >
             <View style={styles.messageIconContainer}>
@@ -122,11 +123,11 @@ export default function SearchScreen() {
             </View>
           </TouchableOpacity>
         );
-      
+
       case 'website':
         return (
-          <TouchableOpacity 
-            style={styles.resultItem} 
+          <TouchableOpacity
+            style={styles.resultItem}
             onPress={() => console.log('Open website or create chat about website')}
           >
             <View style={styles.websiteIconContainer}>
@@ -139,18 +140,16 @@ export default function SearchScreen() {
             </View>
           </TouchableOpacity>
         );
-      
+
       default:
         return null;
     }
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['left', 'right']}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <StatusBar style="light" />
-      <View style={[styles.header, { marginTop: Math.max(insets.top, 10) }]}>
-        <ThemedText style={styles.headerTitle}>Search</ThemedText>
-      </View>
+      <Header>Search</Header>
 
       <View style={styles.searchContainer}>
         <TextInput
@@ -167,14 +166,14 @@ export default function SearchScreen() {
         </TouchableOpacity>
       </View>
 
-      <TabsFilter 
-        activeTab={activeTab as TabType} 
+      <TabsFilter
+        activeTab={activeTab as TabType}
         onTabChange={(tab) => {
           setActiveTab(tab);
           if (hasSearched) {
             handleSearch();
           }
-        }} 
+        }}
       />
 
       {!hasSearched ? (
@@ -202,15 +201,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#FFF',
   },
   searchContainer: {
     flexDirection: 'row',
