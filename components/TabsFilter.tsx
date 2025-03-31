@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, ScrollView, Pressable, Text, ViewStyle, TextStyle } from 'react-native';
 
-export type TabType = 'new' | 'all' | 'groups' | 'classes';
+export type TabType = 'new' | 'all' | 'groups' | 'classes' | 'communities' | 'posts' | 'trending';
 
 interface TabsFilterProps {
     activeTab: TabType;
@@ -49,6 +49,7 @@ export function TabsFilter({ activeTab, onTabChange }: TabsFilterProps) {
 const styles = StyleSheet.create({
     tabsContainer: {
         maxHeight: 55,
+        paddingBottom: 10
     },
     tabs: {
         paddingHorizontal: 20,
@@ -61,6 +62,8 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         borderRadius: 20,
         marginRight: 8,
+        height: 32,
+        lineHeight: 20,
     },
     activeTab: {
         backgroundColor: '#FFFFFF',

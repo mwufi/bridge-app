@@ -132,8 +132,44 @@ export default function HomeScreen() {
   };
 
   const handleInputSubmit = () => {
-    if (inputText.trim()) {
-      // Handle search or note saving logic
+    const trimmedText = inputText.trim().toLowerCase();
+    
+    if (trimmedText) {
+      // Handle navigation based on input commands
+      if (trimmedText === 'chat') {
+        // Navigate to chat inbox
+        router.push('/chat');
+      } else if (trimmedText.startsWith('chat ')) {
+        // Extract bot name/id and navigate to specific chat
+        const botName = trimmedText.substring(5).trim();
+        let botId = '1'; // Default to Ara
+        
+        // Find matching bot by name
+        stories.forEach(story => {
+          if (story.name.toLowerCase() === botName) {
+            botId = story.id;
+          }
+        });
+        
+        router.push({
+          pathname: '/chat/[id]',
+          params: { id: botId }
+        });
+      } else if (trimmedText === 'search') {
+        // Navigate to search page
+        router.push('/search');
+      } else if (trimmedText === 'profile' || trimmedText === 'settings') {
+        // Navigate to profile/settings
+        router.push('/profile');
+      } else {
+        // Default: search with Ara (chat with Ara about this topic)
+        router.push({
+          pathname: '/chat/[id]',
+          params: { id: '1', topic: trimmedText }
+        });
+      }
+      
+      // Reset state
       setIsInputModalVisible(false);
       setInputText('');
     }
