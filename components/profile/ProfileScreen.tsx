@@ -43,9 +43,9 @@ export default function ProfileScreen({ onClose }: ProfileScreenProps) {
                 style={styles.keyboardView}
             >
                 <View style={styles.header}>
-                    <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                    {/* <TouchableOpacity onPress={onClose} style={styles.closeButton}>
                         <FontAwesome name="times" size={24} color="#FFFFFF" />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                     <Text style={styles.title}>Profile</Text>
                 </View>
 
