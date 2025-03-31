@@ -22,6 +22,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Header } from '@/components/typography/header';
+import { GemsModal } from '@/components/GemsModal';
 
 // Sample data for stories (frequently chatted bots)
 const stories = [
@@ -76,11 +77,15 @@ const topicSuggestions = [
   { id: '4', title: 'Local hiking trails' },
 ];
 
+// hide Stories section
+const displayStories = false;
+
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [isInputModalVisible, setIsInputModalVisible] = useState(false);
   const [inputText, setInputText] = useState('');
+  const [showGemsModal, setShowGemsModal] = useState(false);
 
   // Animation values for visualizer
   const [visualizerHeights] = useState(
@@ -157,27 +162,38 @@ export default function HomeScreen() {
         contentContainerStyle={[styles.content, { paddingTop: Math.max(insets.top, 10) }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Greeting section */}
-        <Header>Hey, Zen</Header>
+        {/* Greeting section with Gems */}
+        <View style={styles.headerContainer}>
+          <Header>Hey, Zen</Header>
+          <TouchableOpacity 
+            style={styles.gemsContainer}
+            onPress={() => setShowGemsModal(true)}
+          >
+            <FontAwesome name="diamond" size={16} color="#4FACFE" />
+            <Text style={styles.gemsText}>523</Text>
+          </TouchableOpacity>
+        </View>
 
         {/* Stories section (Instagram-like) */}
-        <View style={styles.storiesSection}>
-          <ThemedText style={styles.sectionTitle}>Favorites</ThemedText>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.storiesScroll}>
-            {stories.map((story) => (
-              <TouchableOpacity
-                key={story.id}
-                style={styles.storyContainer}
-                onPress={() => handleStoryPress(story.id)}
-              >
-                <View style={styles.storyImageContainer}>
-                  <Image source={story.image} style={styles.storyImage} />
-                </View>
-                <Text style={styles.storyName}>{story.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+        {displayStories && (
+          <View style={styles.storiesSection}>
+            <ThemedText style={styles.sectionTitle}>Favorites</ThemedText>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.storiesScroll}>
+              {stories.map((story) => (
+                <TouchableOpacity
+                  key={story.id}
+                  style={styles.storyContainer}
+                  onPress={() => handleStoryPress(story.id)}
+                >
+                  <View style={styles.storyImageContainer}>
+                    <Image source={story.image} style={styles.storyImage} />
+                  </View>
+                  <Text style={styles.storyName}>{story.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )}
 
         {/* Stats Section */}
         <View style={styles.statsSection}>
@@ -286,6 +302,13 @@ export default function HomeScreen() {
         <Text style={styles.persistentInputText}>Ask me anything...</Text>
       </TouchableOpacity>
 
+      {/* Gems Congratulations Modal */}
+      <GemsModal
+        visible={showGemsModal}
+        onClose={() => setShowGemsModal(false)}
+        gemCount={523}
+      />
+
       {/* Input Modal with Keyboard Avoiding View */}
       <Modal
         visible={isInputModalVisible}
@@ -371,6 +394,27 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingBottom: 100, // Space for persistent input
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+  },
+  gemsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(79, 172, 254, 0.15)',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+  },
+  gemsText: {
+    color: '#4FACFE',
+    fontWeight: '600',
+    fontSize: 14,
+    marginLeft: 6,
   },
   sectionTitle: {
     fontSize: 18,
