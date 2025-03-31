@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Storage } from '@/utils/storage';
-import DynamicOnboarding from '@/components/onboarding/DynamicOnboarding';
-import NormalChatScreen from '@/components/genz_chat/ChatScreen';
 import { Text } from 'react-native';
+import { Redirect } from 'expo-router';
 import { useFonts } from 'expo-font';
 import {
     Fredoka_400Regular,
@@ -16,6 +14,9 @@ import {
     Outfit_400Regular,
     Outfit_600SemiBold,
 } from '@expo-google-fonts/outfit';
+
+import { Storage } from '@/utils/storage';
+import DynamicOnboarding from '@/components/onboarding/DynamicOnboarding';
 
 export default function App() {
     const isDebug = false;
@@ -52,9 +53,11 @@ export default function App() {
         return <DynamicOnboarding onComplete={handleOnboardingComplete} />;
     }
 
-    return isOnboardingComplete ? (
-        <NormalChatScreen />
-    ) : (
-        <DynamicOnboarding onComplete={handleOnboardingComplete} />
-    );
+    // If onboarding is complete, redirect to the tabbed home screen
+    if (isOnboardingComplete) {
+        return <Redirect href="/(tabs)" />;
+    }
+
+    // Otherwise show onboarding
+    return <DynamicOnboarding onComplete={handleOnboardingComplete} />;
 }

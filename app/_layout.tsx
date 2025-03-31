@@ -28,21 +28,19 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="chat"
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen 
+          name="chat" 
           options={{
             headerShown: false,
-            headerBackTitle: 'Back',
-            headerStyle: {
-              backgroundColor: '#fff',
-            },
-            headerShadowVisible: false,
-          }}
+            presentation: 'card',
+            animation: 'slide_from_right',
+          }} 
         />
       </Stack>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
     </ThemeProvider>
   );
 }
