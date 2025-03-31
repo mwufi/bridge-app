@@ -222,7 +222,7 @@ export default function GenZChatScreen() {
 
             <Modal
                 visible={showProfile}
-                animationType="slide"
+                animationType="fade"
                 presentationStyle="fullScreen"
             >
                 <ProfileScreen onClose={() => setShowProfile(false)} />

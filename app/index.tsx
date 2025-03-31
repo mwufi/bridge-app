@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Storage } from '@/utils/storage';
 import DynamicOnboarding from '@/components/onboarding/DynamicOnboarding';
-import GenZChatScreen from '@/components/genz_chat/ChatScreen';
+import NormalChatScreen from '@/components/genz_chat/ChatScreen';
 import { Text } from 'react-native';
 import { useFonts } from 'expo-font';
 import {
@@ -18,7 +18,7 @@ import {
 } from '@expo-google-fonts/outfit';
 
 export default function App() {
-    const isDebug = true;
+    const isDebug = false;
     const [isOnboardingComplete, setIsOnboardingComplete] = useState<boolean | null>(null);
 
     const [fontsLoaded] = useFonts({
@@ -53,7 +53,7 @@ export default function App() {
     }
 
     return isOnboardingComplete ? (
-        <GenZChatScreen />
+        <NormalChatScreen />
     ) : (
         <DynamicOnboarding onComplete={handleOnboardingComplete} />
     );
