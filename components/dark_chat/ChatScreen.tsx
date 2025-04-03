@@ -15,14 +15,16 @@ import { FontAwesome } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import db from '@/lib/instant';
+import { id } from '@instantdb/react-native';
 
 const emptyStateImage = require('@/assets/images/empty-state.png');
 
 type Message = {
   id: string;
-  text: string;
-  isUser: boolean;
-  timestamp: Date;
+  content: string;
+  role: "user" | "assistant";
+  createdAt: string;
 };
 
 // Sample predefined responses for different personalities
@@ -38,20 +40,50 @@ type ChatScreenProps = {
   chatId?: string;
 };
 
+function addToChat(content: string, role: "user" | "assistant", chatId: string) {
+  const newMessage = { content, role, createdAt: new Date().toISOString() }
+  const newMessageId = id()
+
+  // persist the message
+  db.transact([
+    db.tx.messages[newMessageId].update(newMessage).link({ conversations: chatId })
+  ]);
+
+  return newMessageId
+}
+
 export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ id: string }>();
-  const id = params.id || chatId;
+  const botId = params.id || chatId;
 
-  const [messages, setMessages] = useState<Message[]>([]);
+  // fetch the conversation and its messages
+  const { isLoading, error, data } = db.useQuery({
+    conversations: {
+      $: {
+        where: {
+          id: chatId
+        }
+      },
+      messages: {}
+    }
+  });
+
+  // these are messages from the database
+  const messages = data?.conversations[0]?.messages || [];
+  console.log("instant ok", chatId, messages)
+  if (error) {
+    console.error("UH OH! Instant Error -- ", error.message + ". Look at the error for details", error);
+  }
+
   const [isTyping, setIsTyping] = useState(false);
   const [inputText, setInputText] = useState('');
   const flatListRef = useRef<FlatList>(null);
 
   // Bot data based on the ID
   const botData = {
-    name: getBotName(id),
+    name: getBotName(botId),
     image: require('@/assets/images/icon.png'),
   };
 
@@ -69,7 +101,7 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
   // Scroll to bottom helper
   const scrollToBottom = () => {
     if (flatListRef.current) {
-      flatListRef.current.scrollToEnd({ animated: true });
+      flatListRef.current.scrollToEnd({ animated: false });
     }
   };
 
@@ -98,30 +130,21 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
   const handleSend = () => {
     if (!inputText.trim()) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: inputText.trim(),
-      isUser: true,
-      timestamp: new Date(),
-    };
+    // Insert user message into database
+    addToChat(inputText.trim(), "user", chatId)
 
-    setMessages(prev => [...prev, userMessage]);
     setInputText('');
     setIsTyping(true);
 
     // Simulate AI response
     setTimeout(() => {
       // Get random response from the personality responses
-      const responseArray = personalityResponses[id] || personalityResponses['1'];
+      const responseArray = personalityResponses[botId as keyof typeof personalityResponses] || personalityResponses['1'];
       const randomResponse = responseArray[Math.floor(Math.random() * responseArray.length)];
 
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: randomResponse,
-        isUser: false,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, aiMessage]);
+      // Insert AI response into database
+      addToChat(randomResponse, "assistant", chatId)
+
       setIsTyping(false);
     }, 1500);
   };
@@ -133,23 +156,23 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
   const handleSettings = () => {
     router.push({
       pathname: '/chat/settings',
-      params: { id, name: botData.name }
+      params: { id: botId, name: botData.name }
     });
   };
 
   const MessageBubble = ({ message }: { message: Message }) => (
     <View style={[
       styles.messageBubble,
-      message.isUser ? styles.userBubble : styles.aiBubble
+      message.role === "user" ? styles.userBubble : styles.aiBubble
     ]}>
-      {!message.isUser && (
+      {message.role === "assistant" && (
         <Image source={botData.image} style={styles.avatarImage} />
       )}
       <View style={[
         styles.messageContent,
-        message.isUser ? styles.userContent : styles.aiContent
+        message.role === "user" ? styles.userContent : styles.aiContent
       ]}>
-        <Text style={styles.messageText}>{message.text}</Text>
+        <Text style={styles.messageText}>{message.content}</Text>
       </View>
     </View>
   );
@@ -190,11 +213,11 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
             renderItem={({ item, index }) => (
               <View>
                 {(index === 0 ||
-                  new Date(item.timestamp).toDateString() !==
-                  new Date(messages[index - 1].timestamp).toDateString()) && (
+                  new Date(item.createdAt).toDateString() !==
+                  new Date(messages[index - 1].createdAt).toDateString()) && (
                     <View style={styles.dateContainer}>
                       <Text style={styles.dateText}>
-                        {new Date(item.timestamp).toLocaleDateString()}
+                        {new Date(item.createdAt).toLocaleDateString()}
                       </Text>
                     </View>
                   )}

@@ -2,77 +2,33 @@ import React, { useState } from 'react';
 import { StyleSheet, FlatList, View, TouchableOpacity, Text, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { FontAwesome } from '@expo/vector-icons';
 
-import { ThemedText } from '@/components/ThemedText';
-import { TabsFilter, TabType } from '@/components/TabsFilter';
 import { Header } from '@/components/typography/header';
+import db from '@/lib/instant';
+import { id } from '@instantdb/react-native';
 
-// Mock data for conversations
-const conversations = [
-  {
-    id: '1',
-    botName: 'Ara',
-    lastMessage: 'I found some interesting articles about that topic. Would you like me to share them?',
-    time: '10:45 AM',
-    unread: 2,
-    image: require('@/assets/images/icon.png'),
-  },
-  {
-    id: '2',
-    botName: 'GenZ',
-    lastMessage: `No cap, that's so based! Frfr.`,
-    time: 'Yesterday',
-    unread: 0,
-    image: require('@/assets/images/icon.png'),
-  },
-  {
-    id: '3',
-    botName: 'Poet',
-    lastMessage: 'Words dance upon the page, like stars upon the night sky...',
-    time: 'Yesterday',
-    unread: 1,
-    image: require('@/assets/images/icon.png'),
-  },
-  {
-    id: '4',
-    botName: 'Chef',
-    lastMessage: 'Would you like me to suggest a recipe for dinner tonight?',
-    time: 'Monday',
-    unread: 0,
-    image: require('@/assets/images/icon.png'),
-  },
-  {
-    id: '5',
-    botName: 'Friend',
-    lastMessage: 'How was your weekend? Did you get a chance to try that new restaurant?',
-    time: 'Sunday',
-    unread: 0,
-    image: require('@/assets/images/icon.png'),
-  },
-];
 
 export default function ChatInboxScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
-  const [activeTab, setActiveTab] = useState<TabType>('all');
-  const [filteredConversations, setFilteredConversations] = useState(conversations);
 
-  const handleTabChange = (tab: TabType) => {
-    setActiveTab(tab);
-
-    // Filter conversations based on the selected tab
-    if (tab === 'all') {
-      setFilteredConversations(conversations);
-    } else if (tab === 'new') {
-      setFilteredConversations(conversations.filter(conv => conv.unread > 0));
-    } else {
-      // For demo purposes, just show a subset based on tab
-      setFilteredConversations(conversations.filter((_, index) => index % 2 === (tab === 'groups' ? 0 : 1)));
+  // Fetch conversations and their latest messages
+  const { isLoading, error, data } = db.useQuery({
+    conversations: {
+      $: {
+        order: {
+          createdAt: 'desc'
+        }
+      }
     }
-  };
+  });
+
+  if (error) {
+    console.error("UH OH! Instant Error -- ", error.message + ". Look at the error for details", error);
+  }
+
+  const conversations = (data?.conversations || []);
 
   const handleConversationPress = (id: string) => {
     router.push({
@@ -86,34 +42,53 @@ export default function ChatInboxScreen() {
     router.push('/chat/new');
   };
 
-  const renderConversationItem = ({ item }: { item: typeof conversations[0] }) => (
-    <TouchableOpacity
-      style={styles.conversationItem}
-      onPress={() => handleConversationPress(item.id)}
-    >
-      <View style={styles.avatarContainer}>
-        <Image source={item.image} style={styles.avatar} />
-        {item.unread > 0 && (
-          <View style={styles.unreadBadge}>
-            <Text style={styles.unreadCount}>{item.unread}</Text>
-          </View>
-        )}
-      </View>
+  const formatTime = (dateString: string | number) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-      <View style={styles.conversationContent}>
-        <View style={styles.conversationHeader}>
-          <Text style={styles.botName}>{item.botName}</Text>
-          <Text style={styles.timeStamp}>{item.time}</Text>
+    if (days === 0) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } else if (days === 1) {
+      return 'Yesterday';
+    } else if (days < 7) {
+      return date.toLocaleDateString([], { weekday: 'long' });
+    } else {
+      return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    }
+  };
+
+  const renderConversationItem = ({ item }: { item: any }) => {
+    const lastMessage = item.data?.messages?.[0];
+    const botInfo = item.data?.botInfo || { name: 'Ara', image: require('@/assets/images/icon.png') };
+
+    return (
+      <TouchableOpacity
+        style={styles.conversationItem}
+        onPress={() => handleConversationPress(item.id)}
+      >
+        <View style={styles.avatarContainer}>
+          <Image source={botInfo.image} style={styles.avatar} />
         </View>
-        <Text
-          style={[styles.lastMessage, item.unread > 0 && styles.unreadMessage]}
-          numberOfLines={1}
-        >
-          {item.lastMessage}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
+
+        <View style={styles.conversationContent}>
+          <View style={styles.conversationHeader}>
+            <Text style={styles.botName}>{item.data?.name || botInfo.name}</Text>
+            <Text style={styles.timeStamp}>
+              {lastMessage ? formatTime(lastMessage.createdAt) : ''}
+            </Text>
+          </View>
+          <Text
+            style={styles.lastMessage}
+            numberOfLines={1}
+          >
+            {lastMessage?.content || 'No messages yet'}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -126,10 +101,8 @@ export default function ChatInboxScreen() {
         </TouchableOpacity>
       </View>
 
-      <TabsFilter activeTab={activeTab} onTabChange={handleTabChange} />
-
       <FlatList
-        data={filteredConversations}
+        data={conversations}
         renderItem={renderConversationItem}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.conversationsList}
@@ -185,22 +158,6 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 28,
   },
-  unreadBadge: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    backgroundColor: '#FF3366',
-    borderRadius: 10,
-    width: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  unreadCount: {
-    color: '#FFF',
-    fontSize: 12,
-    fontWeight: '700',
-  },
   conversationContent: {
     flex: 1,
   },
@@ -222,9 +179,5 @@ const styles = StyleSheet.create({
   lastMessage: {
     fontSize: 14,
     color: '#AAA',
-  },
-  unreadMessage: {
-    color: '#FFF',
-    fontWeight: '500',
   },
 });

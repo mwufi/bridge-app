@@ -15,23 +15,23 @@ import { Text, View } from '@/components/Themed';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import ProfileScreen from '@/components/profile/ProfileScreen';
+import db from '@/lib/instant';
+import { id } from '@instantdb/react-native';
 
-const { height } = Dimensions.get('window');
-
-type Message = {
-    id: string;
-    text: string;
-    isUser: boolean;
-    timestamp: Date;
-};
 
 export default function GenZChatScreen() {
-    const [messages, setMessages] = useState<Message[]>([]);
     const [inputText, setInputText] = useState<string>('');
     const [showProfile, setShowProfile] = useState(false);
     const inputRef = useRef<TextInput>(null);
     const scrollViewRef = useRef<ScrollView>(null);
     const keyboardHeight = useRef(new Animated.Value(0));
+
+    const { isLoading, error, data } = db.useQuery({
+        messages: {}
+    });
+
+    // these are messages from the database
+    const messages = data?.messages || [];
 
     // Auto focus on mount
     useEffect(() => {
@@ -99,14 +99,9 @@ export default function GenZChatScreen() {
     const handleSend = () => {
         if (!inputText.trim()) return;
 
-        const newMessage: Message = {
-            id: Date.now().toString(),
-            text: inputText,
-            isUser: true,
-            timestamp: new Date(),
-        };
+        // TODO: for now, directly insert into the database
+        db.transact(db.tx.messages[id()].update({ content: inputText, role: "user", createdAt: new Date().toISOString() }));
 
-        setMessages(prev => [...prev, newMessage]);
         setInputText('');
         inputRef.current?.focus();
 
@@ -129,14 +124,8 @@ export default function GenZChatScreen() {
             ];
             const randomResponse = responses[Math.floor(Math.random() * responses.length)];
 
-            const assistantMessage: Message = {
-                id: (Date.now() + 1).toString(),
-                text: randomResponse,
-                isUser: false,
-                timestamp: new Date(),
-            };
-
-            setMessages(prev => [...prev, assistantMessage]);
+            // insert into the database
+            db.transact(db.tx.messages[id()].update({ content: randomResponse, role: "assistant", createdAt: new Date().toISOString() }));
         }, 1000);
     };
 
@@ -183,14 +172,14 @@ export default function GenZChatScreen() {
                                     key={message.id}
                                     style={[
                                         styles.messageContainer,
-                                        message.isUser ? styles.userMessage : styles.assistantMessage,
+                                        message.role === "user" ? styles.userMessage : styles.assistantMessage,
                                         {
                                             opacity,
                                             transform: [{ scale }],
                                         },
                                     ]}
                                 >
-                                    <Text style={styles.messageText}>{message.text}</Text>
+                                    <Text style={styles.messageText}>{message.content}</Text>
                                 </Animated.View>
                             );
                         })}

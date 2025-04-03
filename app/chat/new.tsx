@@ -4,59 +4,61 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { FontAwesome } from '@expo/vector-icons';
+import db from '@/lib/instant';
+import { id } from '@instantdb/react-native';
 
 import { ThemedText } from '@/components/ThemedText';
 
 // Mock data for AI personalities
 const aiPersonalities = [
-  { 
-    id: '1', 
-    name: 'Ara', 
+  {
+    id: '1',
+    name: 'Ara',
     description: 'Your friendly AI assistant that can help with anything',
     image: require('@/assets/images/icon.png'),
     accent: '#FF3366',
     popular: true,
   },
-  { 
-    id: '2', 
-    name: 'GenZ', 
+  {
+    id: '2',
+    name: 'GenZ',
     description: 'Talks in current internet lingo and keeps things casual',
     image: require('@/assets/images/icon.png'),
     accent: '#4A2B87',
     popular: true,
   },
-  { 
-    id: '3', 
-    name: 'Poet', 
+  {
+    id: '3',
+    name: 'Poet',
     description: 'Expresses ideas through beautiful, creative writing',
     image: require('@/assets/images/icon.png'),
     accent: '#2B4587',
   },
-  { 
-    id: '4', 
-    name: 'Chef', 
+  {
+    id: '4',
+    name: 'Chef',
     description: 'Culinary expert with thousands of recipes and cooking tips',
     image: require('@/assets/images/icon.png'),
     accent: '#872B4A',
     popular: true,
   },
-  { 
-    id: '5', 
-    name: 'Teacher', 
+  {
+    id: '5',
+    name: 'Teacher',
     description: 'Patient explainer of complex concepts in simple terms',
     image: require('@/assets/images/icon.png'),
     accent: '#2B8745',
   },
-  { 
-    id: '6', 
-    name: 'Traveler', 
+  {
+    id: '6',
+    name: 'Traveler',
     description: 'Well-traveled guide with tips for destinations worldwide',
     image: require('@/assets/images/icon.png'),
     accent: '#87752B',
   },
-  { 
-    id: '7', 
-    name: 'Friend', 
+  {
+    id: '7',
+    name: 'Friend',
     description: "Casual, supportive friend who's always there to listen",
     image: require('@/assets/images/icon.png'),
     accent: '#2B6487',
@@ -70,23 +72,45 @@ export default function NewChatScreen() {
     router.back();
   };
 
-  const handlePersonalitySelect = (id: string) => {
-    // Navigate to a new chat with the selected personality
-    router.push(`/chat/${id}`);
+  const handlePersonalitySelect = async (personalityId: string) => {
+    try {
+      // Create a new conversation
+      const conversationId = id();
+      const personality = aiPersonalities.find(p => p.id === personalityId);
+
+      await db.transact([
+        db.tx.conversations[conversationId].update({
+          data: {
+            name: personality?.name || 'New Chat',
+            botId: personalityId,
+            createdAt: new Date().toISOString()
+          }
+        })
+      ]);
+
+      // Navigate to the new chat
+      router.push({
+        pathname: '/chat/[id]',
+        params: { id: conversationId }
+      });
+    } catch (error) {
+      console.error('Error creating new conversation:', error);
+      // You might want to show an error message to the user here
+    }
   };
 
   const renderPersonalityItem = ({ item }: { item: typeof aiPersonalities[0] }) => (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={[
-        styles.personalityCard, 
+        styles.personalityCard,
         { borderColor: item.accent }
-      ]} 
+      ]}
       onPress={() => handlePersonalitySelect(item.id)}
     >
       <View style={[styles.avatarContainer, { backgroundColor: item.accent }]}>
         <Image source={item.image} style={styles.avatar} />
       </View>
-      
+
       <View style={styles.personalityInfo}>
         <View style={styles.nameRow}>
           <Text style={styles.personalityName}>{item.name}</Text>
@@ -100,7 +124,7 @@ export default function NewChatScreen() {
           {item.description}
         </Text>
       </View>
-      
+
       <FontAwesome name="chevron-right" size={16} color="#888" />
     </TouchableOpacity>
   );
@@ -108,7 +132,7 @@ export default function NewChatScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom', 'left', 'right']}>
       <StatusBar style="light" />
-      
+
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={handleBack}>
           <FontAwesome name="chevron-left" size={20} color="#FFF" />
@@ -118,7 +142,7 @@ export default function NewChatScreen() {
 
       <View style={styles.content}>
         <Text style={styles.prompt}>Who would you like to chat with?</Text>
-        
+
         <FlatList
           data={aiPersonalities}
           renderItem={renderPersonalityItem}

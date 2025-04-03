@@ -20,6 +20,10 @@ const getScheme = () => {
   return IS_DEV ? "chatapp-dev" : IS_PREVIEW ? "chatapp-preview" : "chatapp"
 }
 
+const getBaseUrl = () => {
+  return IS_DEV ? "http://localhost:8081" : IS_PREVIEW ? "https://chatapp-preview.vercel.app" : "https://chatapp.vercel.app"
+}
+
 const config = ({ config }: ConfigContext): ExpoConfig => {
   return {
     ...config,
@@ -46,11 +50,16 @@ const config = ({ config }: ConfigContext): ExpoConfig => {
     },
     "web": {
       "bundler": "metro",
-      "output": "static",
+      "output": "server",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router",
+      [
+        "expo-router",
+        {
+          "origin": getBaseUrl()
+        }
+      ],
       [
         "expo-splash-screen",
         {
