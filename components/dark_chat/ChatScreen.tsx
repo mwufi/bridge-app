@@ -19,6 +19,7 @@ import db from '@/lib/instant';
 import { id } from '@instantdb/react-native';
 
 const emptyStateImage = require('@/assets/images/empty-state.png');
+const defaultBotImage = require('@/assets/images/icon.png');
 
 type Message = {
   id: string;
@@ -78,7 +79,10 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
 
   // these are messages from the database
   const messages = data?.conversations[0]?.messages || [];
-  console.log("instant ok", chatId, messages)
+  const botInfo = data?.conversations[0]?.data?.botInfo || {};
+  console.log("instant ok", chatId)
+  console.log("messages", messages)
+  console.log("botInfo", botInfo)
   if (error) {
     console.error("UH OH! Instant Error -- ", error.message + ". Look at the error for details", error);
   }
@@ -89,20 +93,9 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
 
   // Bot data based on the ID
   const botData = {
-    name: getBotName(botId),
-    image: require('@/assets/images/icon.png'),
+    name: botInfo.name,
+    image: botInfo.image || defaultBotImage,
   };
-
-  function getBotName(id: string): string {
-    switch (id) {
-      case '1': return 'Ara';
-      case '2': return 'GenZ';
-      case '3': return 'Poet';
-      case '4': return 'Chef';
-      case '5': return 'Teacher';
-      default: return 'Ara';
-    }
-  }
 
   // Scroll to bottom helper
   const scrollToBottom = () => {

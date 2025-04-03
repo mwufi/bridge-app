@@ -10,6 +10,7 @@ import db from '@/lib/instant';
 import { id } from '@instantdb/react-native';
 import CreateChatModal from '@/components/CreateChatModal';
 
+const defaultBotImage = require('@/assets/images/icon.png');
 
 export default function ChatInboxScreen() {
   const router = useRouter();
@@ -76,7 +77,7 @@ export default function ChatInboxScreen() {
         onPress={() => handleConversationPress(item.id)}
       >
         <View style={styles.avatarContainer}>
-          <Image source={botInfo.image} style={styles.avatar} />
+          <Image source={botInfo.image || defaultBotImage} style={styles.avatar} />
         </View>
 
         <View style={styles.conversationContent}>
