@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   messageList: {
-    padding: 16,
+    padding: 12,
     paddingBottom: 24,
   },
   dateContainer: {
