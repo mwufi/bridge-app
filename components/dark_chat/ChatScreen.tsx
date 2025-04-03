@@ -17,7 +17,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import db from '@/lib/instant';
 import { id } from '@instantdb/react-native';
-
+import { API_URL } from '@/lib/config';
 const emptyStateImage = require('@/assets/images/empty-state.png');
 const defaultBotImage = require('@/assets/images/icon.png');
 
@@ -80,9 +80,9 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
   // these are messages from the database
   const messages = data?.conversations[0]?.messages || [];
   const botInfo = data?.conversations[0]?.data?.botInfo || {};
-  console.log("instant ok", chatId)
-  console.log("messages", messages)
-  console.log("botInfo", botInfo)
+  // console.log("instant ok", chatId)
+  // console.log("messages", messages)
+  // console.log("botInfo", botInfo)
   if (error) {
     console.error("UH OH! Instant Error -- ", error.message + ". Look at the error for details", error);
   }
@@ -126,26 +126,51 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
     </View>
   );
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!inputText.trim()) return;
 
+    const userMessage = inputText.trim();
+    
     // Insert user message into database
-    addToChat(inputText.trim(), "user", chatId, messages.length)
+    addToChat(userMessage, "user", chatId, messages.length)
 
     setInputText('');
     setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      // Get random response from the personality responses
+    try {
+      // Go back to using the internal API route to work around CORS/network issues
+      // Call the Python backend directly to get an AI response
+      // Change this URL to match your backend's address (use your IP or hostname instead of localhost when testing on device)
+      const response = await fetch(`${API_URL}/threads/${chatId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: userMessage
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      } else {
+        console.log("response", await response.json())
+      }
+
+      // The backend will automatically add the AI response to the thread
+      // No need to call addToChat here, since the messages will be loaded from the database
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      
+      // Fallback to random responses if API fails
       const responseArray = personalityResponses[botId as keyof typeof personalityResponses] || personalityResponses['1'];
       const randomResponse = responseArray[Math.floor(Math.random() * responseArray.length)];
-
-      // Insert AI response into database
-      addToChat(randomResponse, "assistant", chatId, messages.length)
-
+      
+      // Insert fallback AI response into database
+      addToChat(`${randomResponse} (API error fallback)`, "assistant", chatId, messages.length)
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const handleBack = () => {
