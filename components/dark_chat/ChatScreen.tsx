@@ -40,12 +40,18 @@ type ChatScreenProps = {
   chatId?: string;
 };
 
-function addToChat(content: string, role: "user" | "assistant", chatId: string) {
+function addToChat(content: string, role: "user" | "assistant", chatId: string, currentNumMessages: number) {
   const newMessage = { content, role, createdAt: new Date().toISOString() }
   const newMessageId = id()
 
   // persist the message
   db.transact([
+    db.tx.conversations[chatId].merge({
+      data: {
+        lastMessage: newMessage,
+        numMessages: currentNumMessages + 1
+      }
+    }),
     db.tx.messages[newMessageId].update(newMessage).link({ conversations: chatId })
   ]);
 
@@ -131,7 +137,7 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
     if (!inputText.trim()) return;
 
     // Insert user message into database
-    addToChat(inputText.trim(), "user", chatId)
+    addToChat(inputText.trim(), "user", chatId, messages.length)
 
     setInputText('');
     setIsTyping(true);
@@ -143,7 +149,7 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
       const randomResponse = responseArray[Math.floor(Math.random() * responseArray.length)];
 
       // Insert AI response into database
-      addToChat(randomResponse, "assistant", chatId)
+      addToChat(randomResponse, "assistant", chatId, messages.length)
 
       setIsTyping(false);
     }, 1500);

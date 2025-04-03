@@ -8,10 +8,12 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Header } from '@/components/typography/header';
 import db from '@/lib/instant';
 import { id } from '@instantdb/react-native';
+import CreateChatModal from '@/components/CreateChatModal';
 
 
 export default function ChatInboxScreen() {
   const router = useRouter();
+  const [isNewChatModalVisible, setIsNewChatModalVisible] = useState(false);
 
   // Fetch conversations and their latest messages
   const { isLoading, error, data } = db.useQuery({
@@ -38,12 +40,13 @@ export default function ChatInboxScreen() {
   };
 
   const handleNewChatPress = () => {
-    // Navigate to bot selection screen
-    router.push('/chat/new');
+    // Show the modal instead of navigating
+    setIsNewChatModalVisible(true);
   };
 
   const formatTime = (dateString: string | number) => {
     const date = new Date(dateString);
+    console.log("date", date, dateString)
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -60,7 +63,11 @@ export default function ChatInboxScreen() {
   };
 
   const renderConversationItem = ({ item }: { item: any }) => {
-    const lastMessage = item.data?.messages?.[0];
+    const lastMessage = item.data?.lastMessage;
+    if (lastMessage && (!lastMessage.content || !lastMessage.createdAt)) {
+      console.error("Invalid lastMessage format:", lastMessage);
+    }
+
     const botInfo = item.data?.botInfo || { name: 'Ara', image: require('@/assets/images/icon.png') };
 
     return (
@@ -107,6 +114,12 @@ export default function ChatInboxScreen() {
         keyExtractor={item => item.id}
         contentContainerStyle={styles.conversationsList}
         showsVerticalScrollIndicator={false}
+      />
+
+      {/* New Chat Modal */}
+      <CreateChatModal
+        visible={isNewChatModalVisible}
+        onClose={() => setIsNewChatModalVisible(false)}
       />
     </SafeAreaView>
   );
