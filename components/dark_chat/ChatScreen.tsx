@@ -130,7 +130,7 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
     if (!inputText.trim()) return;
 
     const userMessage = inputText.trim();
-    
+
     // Insert user message into database
     addToChat(userMessage, "user", chatId, messages.length)
 
@@ -161,11 +161,11 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
       // No need to call addToChat here, since the messages will be loaded from the database
     } catch (error) {
       console.error('Error getting AI response:', error);
-      
+
       // Fallback to random responses if API fails
       const responseArray = personalityResponses[botId as keyof typeof personalityResponses] || personalityResponses['1'];
       const randomResponse = responseArray[Math.floor(Math.random() * responseArray.length)];
-      
+
       // Insert fallback AI response into database
       addToChat(`${randomResponse} (API error fallback)`, "assistant", chatId, messages.length)
     } finally {
@@ -205,6 +205,9 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  // TODO: for debug purposes
+  const tagline = API_URL;
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="light" />
@@ -217,7 +220,7 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
 
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>{botData.name}</Text>
-          <Text style={styles.headerSubtitle}>AI Assistant</Text>
+          <Text style={styles.headerSubtitle}>{tagline}</Text>
         </View>
 
         <TouchableOpacity style={styles.settingsButton} onPress={handleSettings}>
