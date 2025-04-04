@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
     StyleSheet,
     ScrollView,
-    Image,
     View,
     Text,
     TouchableOpacity,
@@ -11,6 +10,7 @@ import {
     KeyboardAvoidingView,
     Platform,
     Animated,
+    Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -110,13 +110,30 @@ export default function HomeScreen() {
                         <Text style={styles.greeting}>Good morning,</Text>
                         <Text style={styles.name}>Zen</Text>
                     </View>
-                    <TouchableOpacity style={styles.avatarContainer}>
-                        <Image
-                            source={require('@/assets/images/icon.png')}
-                            style={styles.avatar}
-                        />
-                        <View style={styles.avatarBadge} />
-                    </TouchableOpacity>
+                    <View style={styles.headerActions}>
+                        <TouchableOpacity
+                            style={styles.headerButton}
+                            onPress={() => router.push('/explore')}
+                        >
+                            <FontAwesome5 name="compass" size={20} color={LIGHT_THEME.accent} />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.headerButton}
+                            onPress={() => router.push('/journal')}
+                        >
+                            <FontAwesome5 name="book" size={20} color={LIGHT_THEME.accent} />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.avatarContainer}
+                            onPress={() => router.push('/profile')}
+                        >
+                            <Image
+                                source={require('@/assets/images/icon.png')}
+                                style={styles.avatar}
+                            />
+                            <View style={styles.avatarBadge} />
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
                 {/* Daily Quote Card */}
@@ -256,6 +273,19 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         marginBottom: 20,
     },
+    headerActions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+    },
+    headerButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: LIGHT_THEME.secondary,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     greeting: {
         fontSize: 16,
         color: LIGHT_THEME.text,
@@ -270,16 +300,16 @@ const styles = StyleSheet.create({
         position: 'relative',
     },
     avatar: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
+        width: 40,
+        height: 40,
+        borderRadius: 20,
         borderWidth: 2,
         borderColor: LIGHT_THEME.accent,
     },
     avatarBadge: {
         position: 'absolute',
-        right: 0,
-        bottom: 0,
+        right: -2,
+        bottom: -2,
         width: 14,
         height: 14,
         borderRadius: 7,
