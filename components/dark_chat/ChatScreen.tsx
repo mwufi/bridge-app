@@ -82,6 +82,7 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
   // Memoize the messages array to prevent unnecessary re-renders
   const messages = useMemo(() => data?.conversations[0]?.messages || [], [data?.conversations[0]?.messages]);
   const botInfo = data?.conversations[0]?.data?.botInfo || {};
+  const conversationName = data?.conversations[0]?.name || botInfo.name;
   // console.log("instant ok", chatId)
   // console.log("messages", messages)
   // console.log("botInfo", botInfo)
@@ -121,7 +122,7 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
         style={styles.emptyImage}
         resizeMode="contain"
       />
-      <Text style={styles.emptyTitle}>Chat with {botData.name}</Text>
+      <Text style={styles.emptyTitle}>Chat with {conversationName}</Text>
       <Text style={styles.emptyText}>
         Type a message to start your conversation!
       </Text>
@@ -180,10 +181,7 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
   };
 
   const handleSettings = () => {
-    router.push({
-      pathname: '/chat/settings',
-      params: { id: botId, name: botData.name }
-    });
+    router.push(`/chat/${botId}/settings`);
   };
 
   // Properly memoize the bot image source
@@ -228,7 +226,7 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
         </TouchableOpacity>
 
         <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>{botData.name}</Text>
+          <Text style={styles.headerTitle}>{conversationName}</Text>
           <Text style={styles.headerSubtitle}>{tagline}</Text>
         </View>
 

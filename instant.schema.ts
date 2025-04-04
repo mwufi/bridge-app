@@ -20,7 +20,7 @@ const _schema = i.schema({
     }),
     conversations: i.entity({
       createdAt: i.date().indexed(),
-      data: i.any(),
+      data: i.any(), // Contains botInfo with { name, systemPrompt, memories, model, features }
       name: i.string(),
     }),
     messages: i.entity({

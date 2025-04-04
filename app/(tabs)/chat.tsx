@@ -47,7 +47,6 @@ export default function ChatInboxScreen() {
 
   const formatTime = (dateString: string | number) => {
     const date = new Date(dateString);
-    console.log("date", date, dateString)
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -82,7 +81,7 @@ export default function ChatInboxScreen() {
 
         <View style={styles.conversationContent}>
           <View style={styles.conversationHeader}>
-            <Text style={styles.botName}>{item.data?.name || botInfo.name}</Text>
+            <Text style={styles.botName}>{item.name || botInfo.name}</Text>
             <Text style={styles.timeStamp}>
               {lastMessage ? formatTime(lastMessage.createdAt) : ''}
             </Text>
