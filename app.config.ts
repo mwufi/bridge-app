@@ -13,23 +13,23 @@ const getUniqueIdentifier = () => {
 }
 
 const getSlug = () => {
-  return IS_DEV ? "chatapp-dev" : IS_PREVIEW ? "chatapp-preview" : "chatapp"
+  return IS_DEV ? "my-app-dev" : IS_PREVIEW ? "my-app-preview" : "my-app"
 }
 
 const getScheme = () => {
-  return IS_DEV ? "chatapp-dev" : IS_PREVIEW ? "chatapp-preview" : "chatapp"
+  return IS_DEV ? "my-app-dev" : IS_PREVIEW ? "my-app-preview" : "my-app"
 }
 
 const getBaseUrl = () => {
-  return IS_DEV ? "http://localhost:8081" : IS_PREVIEW ? "https://chatapp-preview.vercel.app" : "https://chatapp.vercel.app"
+  return IS_DEV ? "http://localhost:8081" : IS_PREVIEW ? "https://my-app-preview.vercel.app" : "https://my-app.vercel.app"
 }
 
 const getApiUrl = () => {
-  return process.env.EXPO_PUBLIC_API_URL || (IS_DEV 
-    ? "https://f6db-71-238-155-26.ngrok-free.app" 
-    : IS_PREVIEW 
-      ? "https://api-preview.chatapp.com" 
-      : "https://api.chatapp.com")
+  return process.env.EXPO_PUBLIC_API_URL || (IS_DEV
+    ? "https://f6db-71-238-155-26.ngrok-free.app"
+    : IS_PREVIEW
+      ? "https://api-preview.my-app.com"
+      : "https://api.my-app.com")
 }
 
 const config = ({ config }: ConfigContext): ExpoConfig => {
@@ -45,6 +45,7 @@ const config = ({ config }: ConfigContext): ExpoConfig => {
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
+      "usesAppleSignIn": true,
       "bundleIdentifier": getUniqueIdentifier(),
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
@@ -62,6 +63,7 @@ const config = ({ config }: ConfigContext): ExpoConfig => {
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      "expo-apple-authentication",
       [
         "expo-router",
         {
