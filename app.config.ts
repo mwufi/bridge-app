@@ -13,15 +13,15 @@ const getUniqueIdentifier = () => {
 }
 
 const getSlug = () => {
-  return IS_DEV ? "my-app-dev" : IS_PREVIEW ? "my-app-preview" : "my-app"
+  return IS_DEV ? "my-app" : IS_PREVIEW ? "my-app" : "my-app"
 }
 
 const getScheme = () => {
-  return IS_DEV ? "my-app-dev" : IS_PREVIEW ? "my-app-preview" : "my-app"
+  return IS_DEV ? "my-app" : IS_PREVIEW ? "my-app" : "my-app"
 }
 
 const getBaseUrl = () => {
-  return IS_DEV ? "http://localhost:8081" : IS_PREVIEW ? "https://my-app-preview.vercel.app" : "https://my-app.vercel.app"
+  return IS_DEV ? "http://localhost:8081" : IS_PREVIEW ? "https://f6db-71-238-155-26.ngrok-free.app" : "https://my-app.vercel.app"
 }
 
 const getApiUrl = () => {
