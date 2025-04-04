@@ -382,6 +382,7 @@ const styles = StyleSheet.create({
   messageContent: {
     padding: 12,
     borderRadius: 20,
+    maxWidth: '90%',
   },
   userContent: {
     backgroundColor: '#FF3366',
