@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   StyleSheet,
   FlatList,
@@ -15,6 +15,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import TypingIndicator from './TypingIndicator';
 import db from '@/lib/instant';
 import { id } from '@instantdb/react-native';
 import { API_URL } from '@/lib/config';
@@ -78,7 +79,8 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
   });
 
   // these are messages from the database
-  const messages = data?.conversations[0]?.messages || [];
+  // Memoize the messages array to prevent unnecessary re-renders
+  const messages = useMemo(() => data?.conversations[0]?.messages || [], [data?.conversations[0]?.messages]);
   const botInfo = data?.conversations[0]?.data?.botInfo || {};
   // console.log("instant ok", chatId)
   // console.log("messages", messages)
@@ -184,13 +186,20 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
     });
   };
 
-  const MessageBubble = ({ message }: { message: Message }) => (
+  // Properly memoize the bot image source
+  const botImageSource = useMemo(() => botData.image, []);
+
+  const MessageBubble = useCallback(({ message }: { message: Message }) => (
     <View style={[
       styles.messageBubble,
       message.role === "user" ? styles.userBubble : styles.aiBubble
     ]}>
       {message.role === "assistant" && (
-        <Image source={botData.image} style={styles.avatarImage} />
+        <Image
+          source={botImageSource}
+          style={styles.avatarImage}
+          fadeDuration={0}
+        />
       )}
       <View style={[
         styles.messageContent,
@@ -199,7 +208,7 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
         <Text style={styles.messageText}>{message.content}</Text>
       </View>
     </View>
-  );
+  ), [botImageSource]);
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -237,8 +246,12 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
             ref={flatListRef}
             data={messages}
             keyExtractor={(item) => item.id}
+            removeClippedSubviews={false}
+            initialNumToRender={20}
+            maxToRenderPerBatch={10}
+            windowSize={10}
             renderItem={({ item, index }) => (
-              <View>
+              <View key={`msg-${item.id}`}>
                 {(index === 0 ||
                   new Date(item.createdAt).toDateString() !==
                   new Date(messages[index - 1].createdAt).toDateString()) && (
@@ -255,13 +268,13 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
             onContentSizeChange={scrollToBottom}
             ListFooterComponent={isTyping ? (
               <View style={styles.typingContainer}>
-                <Image source={botData.image} style={styles.typingAvatar} />
+                <Image
+                  source={botImageSource}
+                  style={styles.avatarImage}
+                  fadeDuration={0}
+                />
                 <View style={styles.typingBubble}>
-                  <View style={styles.typingDots}>
-                    <View style={styles.typingDot} />
-                    <View style={[styles.typingDot, { animationDelay: '0.2s' }]} />
-                    <View style={[styles.typingDot, { animationDelay: '0.4s' }]} />
-                  </View>
+                  <TypingIndicator />
                 </View>
               </View>
             ) : null}
@@ -284,6 +297,9 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
               value={inputText}
               onChangeText={setInputText}
               multiline
+              autoCapitalize="none"
+              spellCheck={false}
+              keyboardAppearance="dark"
             />
           </View>
 
@@ -401,12 +417,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginTop: 8,
   },
-  typingAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    marginRight: 8,
-  },
+  // Remove the typingAvatar style since we're using the same BotAvatar component
   typingBubble: {
     backgroundColor: '#1A1A1A',
     padding: 12,
@@ -423,7 +434,6 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: '#888',
     marginHorizontal: 2,
-    opacity: 0.5,
   },
   emptyContainer: {
     flex: 1,
