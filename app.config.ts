@@ -24,6 +24,14 @@ const getBaseUrl = () => {
   return IS_DEV ? "http://localhost:8081" : IS_PREVIEW ? "https://chatapp-preview.vercel.app" : "https://chatapp.vercel.app"
 }
 
+const getApiUrl = () => {
+  return process.env.EXPO_PUBLIC_API_URL || (IS_DEV 
+    ? "https://f6db-71-238-155-26.ngrok-free.app" 
+    : IS_PREVIEW 
+      ? "https://api-preview.chatapp.com" 
+      : "https://api.chatapp.com")
+}
+
 const config = ({ config }: ConfigContext): ExpoConfig => {
   return {
     ...config,
@@ -85,7 +93,8 @@ const config = ({ config }: ConfigContext): ExpoConfig => {
       },
       "eas": {
         "projectId": "b5193418-ccc8-47f7-b25f-e4584de842e3"
-      }
+      },
+      "apiUrl": getApiUrl()
     }
   }
 }
