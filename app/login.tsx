@@ -7,11 +7,8 @@ import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
 import {
     GoogleOneTapSignIn,
-    GoogleSignin,
-    statusCodes,
     type OneTapUser,
 } from '@react-native-google-signin/google-signin';
-import { GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import { createAccount, signIn } from '@/lib/google/login';
 
 type AppleUser = {
@@ -23,12 +20,30 @@ export default function App() {
     const [isAppleAvailable, setIsAppleAvailable] = useState(false);
     const [storedUser, setStoredUser] = useState<string | null>(null);
     const [storedToken, setStoredToken] = useState<string | null>(null);
+    const [loaded, setLoaded] = useState(false);
     const insets = useSafeAreaInsets();
 
     const [googleUser, setGoogleUser] = useState<OneTapUser | null>(null);
     const [appleUser, setAppleUser] = useState<AppleUser | null>(null);
 
     useEffect(() => {
+        if (Platform.OS === 'web') {
+            const scriptTag = document.createElement('script');
+            scriptTag.src = 'https://accounts.google.com/gsi/client';
+            scriptTag.async = true;
+            scriptTag.onload = () => {
+                setLoaded(true);
+                console.log('Google Sign-In script loaded');
+            };
+            scriptTag.onerror = (error) => {
+                console.error('Failed to load Google script:', error);
+            };
+
+            document.body.appendChild(scriptTag);
+            return () => {
+                document.body.removeChild(scriptTag);
+            };
+        }
         const checkAppleAvailability = async () => {
             const isAvailable = await AppleAuthentication.isAvailableAsync();
             console.log('isAvailable', isAvailable);
@@ -49,9 +64,12 @@ export default function App() {
     }, []);
 
     useEffect(() => {
+        // this init is done on iOS only
+        if (Platform.OS === 'web') return;
+
         GoogleOneTapSignIn.configure({
             iosClientId: '477687467226-1el8soi6fth8mklcl8oapmnss15q6m0b.apps.googleusercontent.com',
-            webClientId: '477687467226-1el8soi6fth8mklcl8oapmnss15q6m0b.apps.googleusercontent.com',
+            webClientId: '477687467226-n0pvp7akpvvh1bsitf65dg65lp2j2sfs.apps.googleusercontent.com',
         });
 
         const doGoogleSignIn = async () => {
@@ -61,11 +79,80 @@ export default function App() {
                 setGoogleUser(result.user!);
             }
         };
-
         doGoogleSignIn();
     }, []);
 
+    useEffect(() => {
+        // this init is done on web only
+        if (Platform.OS !== 'web' || !loaded) return;
+
+        GoogleOneTapSignIn.configure({
+            iosClientId: '477687467226-1el8soi6fth8mklcl8oapmnss15q6m0b.apps.googleusercontent.com',
+            webClientId: '477687467226-n0pvp7akpvvh1bsitf65dg65lp2j2sfs.apps.googleusercontent.com',
+        });
+
+        GoogleOneTapSignIn.signIn(
+            {
+                ux_mode: 'popup',
+            },
+            {
+                onResponse: (response) => {
+                    if (response.type === 'success') {
+                        console.log(response.data);
+                    }
+                },
+                onError: (error) => {
+                    // handle error
+                    console.log('error', error);
+                },
+                momentListener: (moment: any) => {
+                    console.log('moment', moment);
+                },
+            },
+        );
+
+    }, [loaded]);
+
     const loggedIn = appleUser || googleUser;
+
+    const handleGoogleSignIn = async () => {
+        if (Platform.OS === 'web') {
+            GoogleOneTapSignIn.signIn(
+                {
+                    ux_mode: 'popup',
+                },
+                {
+                    onResponse: (response) => {
+                        if (response.type === 'success') {
+                            console.log(response.data);
+                        }
+                    },
+                    onError: (error) => {
+                        // handle error
+                        console.log('error', error);
+                    },
+                    momentListener: (moment: any) => {
+                        console.log('moment', moment);
+                    },
+                },
+            );
+            return;
+        }
+
+        // universal sign in
+        const result = await signIn();
+        console.log('result', result);
+        if (result.status === 'noSavedCredentialFound') {
+            const result = await createAccount();
+            console.log('result', result);
+            if (result.status === 'signedIn') {
+                setGoogleUser(result.user!);
+            }
+        }
+        if (result.status === 'signedIn') {
+            setGoogleUser(result.user!);
+        }
+    };
 
     return (
         <View style={styles.container}>
@@ -104,7 +191,7 @@ export default function App() {
 
                     {false ? (
                         <View style={styles.content}>
-                            <Text style={styles.loggedInText}>Welcome back, {storedUser}</Text>
+                            <Text style={styles.loggedInText}>Welcome back, {appleUser?.identityToken}</Text>
                         </View>
                     ) : (
                         <View style={styles.content}>
@@ -156,22 +243,7 @@ export default function App() {
 
                             <Pressable
                                 style={styles.googleButton}
-                                onPress={async () => {
-                                    // initiate sign in
-                                    const result = await signIn();
-                                    console.log('result', result);
-                                    if (result.status === 'noSavedCredentialFound') {
-                                        // initiate sign in
-                                        const result = await createAccount();
-                                        console.log('result', result);
-                                        if (result.status === 'signedIn') {
-                                            setGoogleUser(result.user!);
-                                        }
-                                    }
-                                    if (result.status === 'signedIn') {
-                                        setGoogleUser(result.user!);
-                                    }
-                                }}
+                                onPress={handleGoogleSignIn}
                             >
                                 <Image
                                     source={require('@/assets/images/google-logo.webp')}
