@@ -65,6 +65,12 @@ const config = ({ config }: ConfigContext): ExpoConfig => {
     "plugins": [
       "expo-apple-authentication",
       [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.477687467226-1el8soi6fth8mklcl8oapmnss15q6m0b"
+        }
+      ],
+      [
         "expo-router",
         {
           "origin": getBaseUrl()

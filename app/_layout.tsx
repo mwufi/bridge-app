@@ -21,6 +21,8 @@ export default function RootLayout() {
                 contentStyle: { backgroundColor: LIGHT_THEME.background }
             }}>
                 <Stack.Screen name="index" />
+                <Stack.Screen name="login" />
+                <Stack.Screen name="homescreen" />
                 <Stack.Screen
                     name="explore"
                     options={{

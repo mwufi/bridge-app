@@ -1,12 +1,31 @@
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { useState, useEffect } from 'react';
-import { View, StyleSheet, Platform, ImageBackground, Text } from 'react-native';
+import { View, StyleSheet, Platform, ImageBackground, Text, Pressable } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as SecureStore from 'expo-secure-store';
+import { router } from 'expo-router';
+import {
+    GoogleOneTapSignIn,
+    statusCodes,
+    type OneTapUser,
+} from '@react-native-google-signin/google-signin';
+import { GoogleSigninButton } from '@react-native-google-signin/google-signin';
+import { createAccount, signIn } from '@/lib/google/login';
+
+type AppleUser = {
+    user: string;
+    identityToken: string;
+}
 
 export default function App() {
     const [isAppleAvailable, setIsAppleAvailable] = useState(false);
+    const [storedUser, setStoredUser] = useState<string | null>(null);
+    const [storedToken, setStoredToken] = useState<string | null>(null);
     const insets = useSafeAreaInsets();
+
+    const [googleUser, setGoogleUser] = useState<OneTapUser | null>(null);
+    const [appleUser, setAppleUser] = useState<AppleUser | null>(null);
 
     useEffect(() => {
         const checkAppleAvailability = async () => {
@@ -14,8 +33,38 @@ export default function App() {
             console.log('isAvailable', isAvailable);
             setIsAppleAvailable(isAvailable);
         };
+        const loadStoredAuth = async () => {
+            const user = await SecureStore.getItemAsync('user');
+            const token = await SecureStore.getItemAsync('identityToken');
+            if (user && token) {
+                setAppleUser({
+                    user: user,
+                    identityToken: token,
+                });
+            }
+        };
         checkAppleAvailability();
+        loadStoredAuth();
     }, []);
+
+    useEffect(() => {
+        GoogleOneTapSignIn.configure({
+            iosClientId: '477687467226-1el8soi6fth8mklcl8oapmnss15q6m0b.apps.googleusercontent.com',
+            webClientId: '477687467226-1el8soi6fth8mklcl8oapmnss15q6m0b.apps.googleusercontent.com',
+        });
+
+        const doGoogleSignIn = async () => {
+            const result = await signIn();
+            console.log('result', result);
+            if (result.status === 'signedIn') {
+                setGoogleUser(result.user!);
+            }
+        };
+
+        doGoogleSignIn();
+    }, []);
+
+    const loggedIn = appleUser || googleUser;
 
     return (
         <View style={styles.container}>
@@ -31,34 +80,103 @@ export default function App() {
                         <Text style={styles.subtitle}>Connect with your world</Text>
                     </View>
 
-                    <View style={styles.content}>
-                        {Platform.OS === 'ios' && isAppleAvailable && (
-                            <AppleAuthentication.AppleAuthenticationButton
-                                buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-                                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE}
-                                cornerRadius={8}
-                                style={styles.button}
+                    {googleUser && (
+                        <View style={styles.content}>
+                            <Text style={styles.loggedInText}>Welcome back, {googleUser.user.email}</Text>
+                            <Pressable
+                                style={styles.signOutButton}
                                 onPress={async () => {
-                                    try {
-                                        const credential = await AppleAuthentication.signInAsync({
-                                            requestedScopes: [
-                                                AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-                                                AppleAuthentication.AppleAuthenticationScope.EMAIL,
-                                            ],
-                                        });
-                                        console.log(credential);
-                                        // signed in
-                                    } catch (e: any) {
-                                        if (e.code === 'ERR_REQUEST_CANCELED') {
-                                            // handle that the user canceled the sign-in flow
-                                        } else {
-                                            // handle other errors
+                                    await GoogleOneTapSignIn.signOut(googleUser.user.id);
+                                    setGoogleUser(null);
+                                }}
+                            >
+                                <Text style={styles.signOutButtonText}>Sign Out</Text>
+                            </Pressable>
+                        </View>
+                    )}
+
+                    {appleUser && (
+                        <View style={styles.content}>
+                            <Text style={styles.loggedInText}>Welcome back, {appleUser.user}</Text>
+                        </View>
+                    )}
+
+                    {false ? (
+                        <View style={styles.content}>
+                            <Text style={styles.loggedInText}>Welcome back, {storedUser}</Text>
+                        </View>
+                    ) : (
+                        <View style={styles.content}>
+                            {Platform.OS === 'ios' && isAppleAvailable && !loggedIn && (
+                                <AppleAuthentication.AppleAuthenticationButton
+                                    buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+                                    buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE}
+                                    cornerRadius={8}
+                                    style={styles.button}
+                                    onPress={async () => {
+                                        try {
+                                            const credential = await AppleAuthentication.signInAsync({
+                                                requestedScopes: [
+                                                    AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+                                                    AppleAuthentication.AppleAuthenticationScope.EMAIL,
+                                                ],
+                                            });
+
+                                            if (credential.identityToken) {
+                                                // Store auth tokens securely
+                                                await SecureStore.setItemAsync('identityToken', credential.identityToken);
+                                                await SecureStore.setItemAsync('user', credential.user);
+
+                                                // Create user data object
+                                                const userData = {
+                                                    id: credential.user,
+                                                    email: credential.email,
+                                                    fullName: credential.fullName ?
+                                                        `${credential.fullName.givenName} ${credential.fullName.familyName}` :
+                                                        null,
+                                                };
+
+                                                // TODO: Send to your backend
+                                                // await createOrUpdateUser(userData);
+
+                                                // Navigate to main app
+                                                router.replace('/');
+                                            }
+                                        } catch (e: any) {
+                                            if (e.code === 'ERR_REQUEST_CANCELED') {
+                                                // handle that the user canceled the sign-in flow
+                                            } else {
+                                                // handle other errors
+                                            }
                                         }
+                                    }}
+                                />
+                            )}
+
+                            <GoogleSigninButton
+                                size={GoogleSigninButton.Size.Wide}
+                                color={GoogleSigninButton.Color.Dark}
+                                onPress={async () => {
+                                    // initiate sign in
+                                    const result = await signIn();
+                                    console.log('result', result);
+                                    if (result.status === 'noSavedCredentialFound') {
+                                        // initiate sign in
+                                        const result = await createAccount();
+                                        console.log('result', result);
+                                        if (result.status === 'signedIn') {
+                                            setGoogleUser(result.user!);
+                                        }
+                                    }
+                                    if (result.status === 'signedIn') {
+                                        setGoogleUser(result.user!);
                                     }
                                 }}
                             />
-                        )}
-                    </View>
+
+                        </View>
+                    )}
+
                 </View>
             </ImageBackground>
         </View>
@@ -104,5 +222,21 @@ const styles = StyleSheet.create({
     button: {
         width: 280,
         height: 44,
+    },
+    loggedInText: {
+        color: 'white',
+        fontSize: 28,
+        textAlign: 'center',
+    },
+    signOutButton: {
+        backgroundColor: 'white',
+        padding: 10,
+        marginTop: 10,
+        borderRadius: 5,
+    },
+    signOutButtonText: {
+        color: 'black',
+        fontSize: 16,
+        textAlign: 'center',
     },
 });
