@@ -1,12 +1,13 @@
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { useState, useEffect } from 'react';
-import { View, StyleSheet, Platform, ImageBackground, Text, Pressable } from 'react-native';
+import { View, StyleSheet, Platform, ImageBackground, Text, Pressable, Image } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
 import {
     GoogleOneTapSignIn,
+    GoogleSignin,
     statusCodes,
     type OneTapUser,
 } from '@react-native-google-signin/google-signin';
@@ -107,7 +108,7 @@ export default function App() {
                         </View>
                     ) : (
                         <View style={styles.content}>
-                            {Platform.OS === 'ios' && isAppleAvailable && !loggedIn && (
+                            {Platform.OS === 'ios' && isAppleAvailable && (
                                 <AppleAuthentication.AppleAuthenticationButton
                                     buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
                                     buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE}
@@ -153,9 +154,8 @@ export default function App() {
                                 />
                             )}
 
-                            <GoogleSigninButton
-                                size={GoogleSigninButton.Size.Wide}
-                                color={GoogleSigninButton.Color.Dark}
+                            <Pressable
+                                style={styles.googleButton}
                                 onPress={async () => {
                                     // initiate sign in
                                     const result = await signIn();
@@ -172,7 +172,13 @@ export default function App() {
                                         setGoogleUser(result.user!);
                                     }
                                 }}
-                            />
+                            >
+                                <Image
+                                    source={require('@/assets/images/google-logo.webp')}
+                                    style={styles.googleIcon}
+                                />
+                                <Text style={styles.googleButtonText}>Sign in with Google</Text>
+                            </Pressable>
 
                         </View>
                     )}
@@ -222,6 +228,52 @@ const styles = StyleSheet.create({
     button: {
         width: 280,
         height: 44,
+        // iOS shadow
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        // Android shadow
+        elevation: 4,
+    },
+    googleButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'black',
+        borderRadius: 8,
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        marginTop: 16,
+        width: 280,
+        height: 44,
+        // iOS shadow
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.3,
+        shadowRadius: 4.65,
+        // Android shadow
+        elevation: 8,
+        // Subtle gradient-like effect with a slightly lighter top
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    googleIcon: {
+        width: 18,
+        height: 18,
+        marginRight: 12,
+        tintColor: 'white',
+    },
+    googleButtonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: '500',
     },
     loggedInText: {
         color: 'white',
