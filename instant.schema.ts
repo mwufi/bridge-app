@@ -3,7 +3,7 @@
 import { i } from "@instantdb/react-native";
 
 const _schema = i.schema({
-  // We inferred 2 attributes!
+  // We inferred 5 attributes!
   // Take a look at this schema, and if everything looks good,
   // run `push schema` again to enforce the types.
   entities: {
@@ -20,13 +20,24 @@ const _schema = i.schema({
     }),
     conversations: i.entity({
       createdAt: i.date().indexed(),
-      data: i.any(), // Contains botInfo with { name, systemPrompt, memories, model, features }
+      data: i.json(),
       name: i.string(),
+    }),
+    "dev.config": i.entity({
+      name: i.string().unique().indexed(),
+      value: i.json(),
     }),
     messages: i.entity({
       content: i.string(),
       createdAt: i.date(),
       role: i.string(),
+    }),
+    profiles: i.entity({
+      details: i.json(),
+      theme: i.string(),
+      userDescription: i.string(),
+      userHandle: i.string().unique().indexed(),
+      userName: i.string().unique().indexed(),
     }),
   },
   links: {

@@ -7,13 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 
 import { ThemedText } from '@/components/ThemedText';
 import db from '@/lib/instant';
-
-const modelOptions = [
-  { id: 'claude-3.7', name: 'Claude 3.7', description: 'Anthropic\'s most advanced AI' },
-  { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', description: 'Google\'s advanced capabilities' },
-  { id: 'gpt-4o', name: 'GPT-4o', description: 'OpenAI\'s most capable model' },
-  { id: 'wizard-lm', name: 'WizardLM', description: 'Specialized conversational AI' },
-];
+import ModelConfig from '@/components/ModelConfig';
 
 const personalityOptions = [
   { id: 'standard', name: 'Standard', description: 'Helpful and balanced' },
@@ -47,7 +41,7 @@ export default function ChatSettingsScreen() {
   const conversation = data?.conversations?.[0];
   const [chatName, setChatName] = useState('');
   const botInfo = conversation?.data?.botInfo || {};
-  
+
   // Set chat name when data loads
   useEffect(() => {
     if (conversation) {
@@ -111,21 +105,21 @@ export default function ChatSettingsScreen() {
     await saveChanges('memories', tempMemories);
     setIsMemoriesModalVisible(false);
   };
-  
+
   const openChatNameModal = () => {
     setTempChatName(chatName);
     setIsChatNameModalVisible(true);
   };
-  
+
   const updateChatName = async () => {
     if (!id || !tempChatName.trim()) return;
-    
+
     await db.transact([
       db.tx.conversations[id as string].update({
         name: tempChatName.trim()
       })
     ]);
-    
+
     setChatName(tempChatName.trim());
     setIsChatNameModalVisible(false);
   };
@@ -181,7 +175,7 @@ export default function ChatSettingsScreen() {
             </TouchableOpacity>
           </View>
           <Text style={styles.chatId}>ID: {id}</Text>
-          
+
           <Modal
             visible={isChatNameModalVisible}
             transparent={true}
@@ -198,13 +192,13 @@ export default function ChatSettingsScreen() {
                   placeholderTextColor="#888"
                 />
                 <View style={styles.modalButtons}>
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={[styles.modalButton, styles.cancelButton]}
                     onPress={() => setIsChatNameModalVisible(false)}
                   >
                     <Text style={styles.buttonText}>Cancel</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={[styles.modalButton, styles.saveButton]}
                     onPress={updateChatName}
                   >
@@ -216,26 +210,10 @@ export default function ChatSettingsScreen() {
           </Modal>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>AI Model</Text>
-          <Text style={styles.sectionDescription}>Select which AI model powers this chat</Text>
-
-          {modelOptions.map((model) => (
-            <TouchableOpacity
-              key={model.id}
-              style={[styles.optionItem, selectedModel === model.id && styles.selectedOption]}
-              onPress={() => updateModel(model.id)}
-            >
-              <View style={styles.optionTextContainer}>
-                <Text style={styles.optionTitle}>{model.name}</Text>
-                <Text style={styles.optionDescription}>{model.description}</Text>
-              </View>
-              {selectedModel === model.id && (
-                <FontAwesome name="check-circle" size={24} color="#FF3366" />
-              )}
-            </TouchableOpacity>
-          ))}
-        </View>
+        <ModelConfig
+          selectedModel={selectedModel}
+          onModelChange={updateModel}
+        />
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Personality</Text>
