@@ -20,28 +20,11 @@ export default function RootLayout() {
                 headerShown: false,
                 contentStyle: { backgroundColor: LIGHT_THEME.background }
             }}>
-                <Stack.Screen name="index" />
-                <Stack.Screen name="login" />
-                <Stack.Screen name="homescreen" />
+
                 <Stack.Screen
-                    name="explore"
+                    name="(tabs)"
                     options={{
-                        presentation: 'card',
-                        animation: 'slide_from_right',
-                    }}
-                />
-                <Stack.Screen
-                    name="profile"
-                    options={{
-                        presentation: 'card',
-                        animation: 'slide_from_right',
-                    }}
-                />
-                <Stack.Screen
-                    name="journal"
-                    options={{
-                        presentation: 'modal',
-                        animation: 'slide_from_bottom',
+                        headerShown: false,
                     }}
                 />
             </Stack>
