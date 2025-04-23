@@ -210,12 +210,8 @@ export default function ChatSettingsScreen() {
           </Modal>
         </View>
 
-        <ModelConfig
-          selectedModel={selectedModel}
-          onModelChange={updateModel}
-        />
 
-        <View style={styles.section}>
+        {/* <View style={styles.section}>
           <Text style={styles.sectionTitle}>Personality</Text>
           <Text style={styles.sectionDescription}>Choose how this AI responds</Text>
 
@@ -234,7 +230,7 @@ export default function ChatSettingsScreen() {
               )}
             </TouchableOpacity>
           ))}
-        </View>
+        </View> */}
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>System Prompt</Text>
@@ -337,6 +333,11 @@ export default function ChatSettingsScreen() {
             </View>
           </Modal>
         </View>
+
+        <ModelConfig
+          selectedModel={selectedModel}
+          onModelChange={updateModel}
+        />
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Features</Text>

@@ -19,6 +19,7 @@ import TypingIndicator from './TypingIndicator';
 import db from '@/lib/instant';
 import { id } from '@instantdb/react-native';
 import { API_URL } from '@/lib/config';
+import { ColorScheme, ColorSchemes, renderBackground, getBackgroundStyle } from '@/lib/theme';
 const emptyStateImage = require('@/assets/images/empty-state.png');
 const defaultBotImage = require('@/assets/images/icon.png');
 
@@ -65,6 +66,9 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ id: string }>();
   const botId = params.id || chatId;
+
+  // Add theme state
+  const [currentTheme, setCurrentTheme] = useState<ColorScheme>(ColorSchemes.rose);
 
   // fetch the conversation and its messages
   const { isLoading, error, data } = db.useQuery({
@@ -187,26 +191,36 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
   // Properly memoize the bot image source
   const botImageSource = useMemo(() => botData.image, []);
 
-  const MessageBubble = useCallback(({ message }: { message: Message }) => (
-    <View style={[
-      styles.messageBubble,
-      message.role === "user" ? styles.userBubble : styles.aiBubble
-    ]}>
-      {message.role === "assistant" && (
-        <Image
-          source={botImageSource}
-          style={styles.avatarImage}
-          fadeDuration={0}
-        />
-      )}
+  const MessageBubble = useCallback(({ message }: { message: Message }) => {
+    const isUser = message.role === "user";
+    const theme = isUser ? currentTheme.userBubble : currentTheme.assistantBubble;
+
+    return (
       <View style={[
-        styles.messageContent,
-        message.role === "user" ? styles.userContent : styles.aiContent
+        styles.messageBubble,
+        isUser ? styles.userBubble : styles.aiBubble
       ]}>
-        <Text style={styles.messageText}>{message.content}</Text>
+        {!isUser && (
+          <Image
+            source={botImageSource}
+            style={styles.avatarImage}
+            fadeDuration={0}
+          />
+        )}
+        <View style={[
+          styles.messageContent,
+          isUser ? styles.userContent : styles.aiContent,
+          {
+            backgroundColor: theme?.background?.value.color || (isUser ? '#FF3366' : '#1A1A1A'),
+          }
+        ]}>
+          <Text style={[styles.messageText, { color: theme?.foreground || '#FFFFFF' }]}>
+            {message.content}
+          </Text>
+        </View>
       </View>
-    </View>
-  ), [botImageSource]);
+    );
+  }, [botImageSource, currentTheme]);
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -215,12 +229,12 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
   // TODO: for debug purposes
   const tagline = API_URL;
 
-  return (
+  const view = (
     <SafeAreaView style={styles.container}>
       <StatusBar style="light" />
 
       {/* Chat Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { borderBottomColor: currentTheme.input?.background || '#222' }]}>
         <TouchableOpacity style={styles.backButton} onPress={handleBack}>
           <FontAwesome name="chevron-left" size={20} color="#FFF" />
         </TouchableOpacity>
@@ -271,7 +285,9 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
                   style={styles.avatarImage}
                   fadeDuration={0}
                 />
-                <View style={styles.typingBubble}>
+                <View style={[styles.typingBubble, {
+                  backgroundColor: currentTheme.assistantBubble?.background?.value.color || '#1A1A1A'
+                }]}>
                   <TypingIndicator />
                 </View>
               </View>
@@ -282,16 +298,23 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
         )}
 
         {/* Input Container */}
-        <View style={styles.inputContainer}>
+        <View style={[styles.inputContainer, {
+          borderTopColor: currentTheme.input?.background || '#222',
+          backgroundColor: currentTheme.input?.background || '#000'
+        }]}>
           <TouchableOpacity style={styles.attachButton}>
-            <FontAwesome name="plus" size={20} color="#888" />
+            <FontAwesome name="plus" size={20} color={currentTheme.input?.foreground || '#888'} />
           </TouchableOpacity>
 
-          <View style={styles.textInputContainer}>
+          <View style={[styles.textInputContainer, {
+            backgroundColor: currentTheme.input?.background || '#1A1A1A'
+          }]}>
             <TextInput
-              style={styles.textInput}
+              style={[styles.textInput, {
+                color: currentTheme.input?.foreground || '#FFF'
+              }]}
               placeholder="Type a message..."
-              placeholderTextColor="#888"
+              placeholderTextColor={currentTheme.input?.foreground || '#888'}
               value={inputText}
               onChangeText={setInputText}
               multiline
@@ -304,23 +327,30 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
           <TouchableOpacity
             style={[
               styles.sendButton,
-              !inputText.trim() && styles.sendButtonDisabled
+              !inputText.trim() && styles.sendButtonDisabled,
+              { backgroundColor: inputText.trim() ? '#FF3366' : '#333' }
             ]}
             onPress={handleSend}
             disabled={!inputText.trim()}
           >
-            <FontAwesome name="paper-plane" size={20} color={inputText.trim() ? "#FFF" : "#555"} />
+            <FontAwesome
+              name="paper-plane"
+              size={20}
+              color={inputText.trim() ? "#FFF" : "#555"}
+            />
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
+
+  return renderBackground(currentTheme.background, view);
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    position: 'relative',
   },
   header: {
     flexDirection: 'row',
@@ -328,8 +358,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#222',
   },
   backButton: {
     width: 40,
@@ -408,16 +436,13 @@ const styles = StyleSheet.create({
   },
   messageText: {
     fontSize: 16,
-    color: '#FFF',
   },
   typingContainer: {
     flexDirection: 'row',
     alignSelf: 'flex-start',
     marginTop: 8,
   },
-  // Remove the typingAvatar style since we're using the same BotAvatar component
   typingBubble: {
-    backgroundColor: '#1A1A1A',
     padding: 12,
     borderRadius: 20,
     borderBottomLeftRadius: 4,
@@ -462,8 +487,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 10,
     borderTopWidth: 1,
-    borderTopColor: '#222',
-    backgroundColor: '#000',
   },
   attachButton: {
     width: 40,
