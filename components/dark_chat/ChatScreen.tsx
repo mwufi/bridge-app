@@ -21,7 +21,7 @@ import TypingIndicator from './TypingIndicator';
 import db from '@/lib/instant';
 import { id } from '@instantdb/react-native';
 import { API_URL } from '@/lib/config';
-import { ColorScheme, ColorSchemes, renderBackground, getBackgroundStyle } from '@/lib/theme';
+import { ColorScheme, ColorSchemes, renderBackground } from '@/lib/theme';
 import { useCustomFonts } from '@/lib/fonts';
 const emptyStateImage = require('@/assets/images/empty-state.png');
 const defaultBotImage = require('@/assets/images/icon.png');

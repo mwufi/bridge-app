@@ -1,8 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { ReactNode } from 'react';
 import { View, Image } from 'react-native';
-import { useFonts, Poppins_100Thin } from '@expo-google-fonts/poppins';
-import { EBGaramond_400Regular } from '@expo-google-fonts/eb-garamond';
 
 export type Color = {
     type: 'gradient' | 'solid' | 'image';
@@ -88,6 +86,66 @@ export const ColorSchemes: Record<string, ColorScheme> = {
         },
         input: {
             background: '#1A1A1A',
+            foreground: '#FFFFFF',
+        },
+    },
+    whimsical: {
+        name: 'whimsical',
+        background: {
+            type: 'gradient',
+            value: {
+                start: '#FFE5E5',
+                end: '#FFC9C9',
+            },
+        },
+        userBubble: {
+            background: {
+                type: 'solid',
+                value: { color: '#FFB6C1' },
+            },
+            foreground: '#333333',
+            fontFamily: 'IngridDarling_400Regular',
+        },
+        assistantBubble: {
+            background: {
+                type: 'solid',
+                value: { color: '#FFF0F5' },
+            },
+            foreground: '#333333',
+            fontFamily: 'PlayfairDisplay_400Regular',
+        },
+        input: {
+            background: '#FFF0F5',
+            foreground: '#333333',
+        },
+    },
+    elegant: {
+        name: 'elegant',
+        background: {
+            type: 'gradient',
+            value: {
+                start: '#2C3E50',
+                end: '#1A1A1A',
+            },
+        },
+        userBubble: {
+            background: {
+                type: 'solid',
+                value: { color: '#34495E' },
+            },
+            foreground: '#FFFFFF',
+            fontFamily: 'CormorantGaramond_300Light',
+        },
+        assistantBubble: {
+            background: {
+                type: 'solid',
+                value: { color: '#2C3E50' },
+            },
+            foreground: '#FFFFFF',
+            fontFamily: 'PlayfairDisplay_500Medium',
+        },
+        input: {
+            background: '#34495E',
             foreground: '#FFFFFF',
         },
     },
