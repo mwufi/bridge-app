@@ -9,6 +9,7 @@ import {
   TextInput,
   Text,
   TouchableOpacity,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
@@ -27,7 +28,7 @@ type Message = {
   id: string;
   content: string;
   role: "user" | "assistant";
-  createdAt: string;
+  createdAt: string | number;
 };
 
 // Sample predefined responses for different personalities
@@ -61,6 +62,73 @@ function addToChat(content: string, role: "user" | "assistant", chatId: string, 
   return newMessageId
 }
 
+type AnimatedMessageBubbleProps = {
+  message: Message;
+  index: number;
+  theme: ColorScheme;
+  botImageSource: any;
+  messages: Message[];
+};
+
+const AnimatedMessageBubble = ({ message, index, theme, botImageSource, messages }: AnimatedMessageBubbleProps) => {
+  const fadeAnim = useRef(new Animated.Value(1)).current; // Start at 1 for existing messages
+  const isUser = message.role === "user";
+  const bubbleTheme = isUser ? theme.userBubble : theme.assistantBubble;
+
+  // Only animate if this is a new message
+  useEffect(() => {
+    if (index === messages.length - 1) { // Only animate the latest message
+      fadeAnim.setValue(0);
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [message.id]); // Only re-run when message ID changes
+
+  return (
+    <Animated.View
+      style={[
+        styles.messageBubble,
+        isUser ? styles.userBubble : styles.aiBubble,
+        {
+          opacity: fadeAnim,
+          transform: [
+            {
+              translateY: fadeAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [20, 0],
+              }),
+            },
+          ],
+        },
+      ]}
+    >
+      {!isUser && (
+        <Image
+          source={botImageSource}
+          style={styles.avatarImage}
+          fadeDuration={0}
+        />
+      )}
+      <View
+        style={[
+          styles.messageContent,
+          isUser ? styles.userContent : styles.aiContent,
+          {
+            backgroundColor: bubbleTheme?.background?.value.color || (isUser ? '#FF3366' : '#1A1A1A'),
+          },
+        ]}
+      >
+        <Text style={[styles.messageText, { color: bubbleTheme?.foreground || '#FFFFFF' }]}>
+          {message.content}
+        </Text>
+      </View>
+    </Animated.View>
+  );
+};
+
 export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -84,7 +152,13 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
 
   // these are messages from the database
   // Memoize the messages array to prevent unnecessary re-renders
-  const messages = useMemo(() => data?.conversations[0]?.messages || [], [data?.conversations[0]?.messages]);
+  const messages = useMemo(() => {
+    const dbMessages = data?.conversations[0]?.messages || [];
+    return dbMessages.map(msg => ({
+      ...msg,
+      role: msg.role as "user" | "assistant"
+    }));
+  }, [data?.conversations[0]?.messages]);
   const botInfo = data?.conversations[0]?.data?.botInfo || {};
   const conversationName = data?.conversations[0]?.name || botInfo.name;
   // console.log("instant ok", chatId)
@@ -191,36 +265,26 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
   // Properly memoize the bot image source
   const botImageSource = useMemo(() => botData.image, []);
 
-  const MessageBubble = useCallback(({ message }: { message: Message }) => {
-    const isUser = message.role === "user";
-    const theme = isUser ? currentTheme.userBubble : currentTheme.assistantBubble;
-
-    return (
-      <View style={[
-        styles.messageBubble,
-        isUser ? styles.userBubble : styles.aiBubble
-      ]}>
-        {!isUser && (
-          <Image
-            source={botImageSource}
-            style={styles.avatarImage}
-            fadeDuration={0}
-          />
+  const renderItem = useCallback(({ item, index }: { item: Message; index: number }) => (
+    <View key={`msg-${item.id}`}>
+      {(index === 0 ||
+        new Date(item.createdAt).toDateString() !==
+        new Date(messages[index - 1].createdAt).toDateString()) && (
+          <View style={styles.dateContainer}>
+            <Text style={styles.dateText}>
+              {new Date(item.createdAt).toLocaleDateString()}
+            </Text>
+          </View>
         )}
-        <View style={[
-          styles.messageContent,
-          isUser ? styles.userContent : styles.aiContent,
-          {
-            backgroundColor: theme?.background?.value.color || (isUser ? '#FF3366' : '#1A1A1A'),
-          }
-        ]}>
-          <Text style={[styles.messageText, { color: theme?.foreground || '#FFFFFF' }]}>
-            {message.content}
-          </Text>
-        </View>
-      </View>
-    );
-  }, [botImageSource, currentTheme]);
+      <AnimatedMessageBubble
+        message={item}
+        index={index}
+        theme={currentTheme}
+        botImageSource={botImageSource}
+        messages={messages}
+      />
+    </View>
+  ), [messages, botImageSource, currentTheme]);
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -262,20 +326,7 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
             initialNumToRender={20}
             maxToRenderPerBatch={10}
             windowSize={10}
-            renderItem={({ item, index }) => (
-              <View key={`msg-${item.id}`}>
-                {(index === 0 ||
-                  new Date(item.createdAt).toDateString() !==
-                  new Date(messages[index - 1].createdAt).toDateString()) && (
-                    <View style={styles.dateContainer}>
-                      <Text style={styles.dateText}>
-                        {new Date(item.createdAt).toLocaleDateString()}
-                      </Text>
-                    </View>
-                  )}
-                <MessageBubble message={item} />
-              </View>
-            )}
+            renderItem={renderItem}
             contentContainerStyle={styles.messageList}
             onContentSizeChange={scrollToBottom}
             ListFooterComponent={isTyping ? (
