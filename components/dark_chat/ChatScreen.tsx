@@ -10,6 +10,7 @@ import {
   Text,
   TouchableOpacity,
   Animated,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
@@ -21,6 +22,7 @@ import db from '@/lib/instant';
 import { id } from '@instantdb/react-native';
 import { API_URL } from '@/lib/config';
 import { ColorScheme, ColorSchemes, renderBackground, getBackgroundStyle } from '@/lib/theme';
+import { useCustomFonts } from '@/lib/fonts';
 const emptyStateImage = require('@/assets/images/empty-state.png');
 const defaultBotImage = require('@/assets/images/icon.png');
 
@@ -74,6 +76,7 @@ const AnimatedMessageBubble = ({ message, index, theme, botImageSource, messages
   const fadeAnim = useRef(new Animated.Value(1)).current; // Start at 1 for existing messages
   const isUser = message.role === "user";
   const bubbleTheme = isUser ? theme.userBubble : theme.assistantBubble;
+  const defaultFont = isUser ? 'Poppins-Thin' : 'Garamond';
 
   // Only animate if this is a new message
   useEffect(() => {
@@ -121,7 +124,13 @@ const AnimatedMessageBubble = ({ message, index, theme, botImageSource, messages
           },
         ]}
       >
-        <Text style={[styles.messageText, { color: bubbleTheme?.foreground || '#FFFFFF' }]}>
+        <Text style={[
+          styles.messageText,
+          {
+            color: bubbleTheme?.foreground || '#FFFFFF',
+            fontFamily: bubbleTheme?.fontFamily || defaultFont,
+          }
+        ]}>
           {message.content}
         </Text>
       </View>
@@ -134,6 +143,9 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ id: string }>();
   const botId = params.id || chatId;
+
+  // Load custom fonts
+  const fontsLoaded = useCustomFonts();
 
   // Add theme state
   const [currentTheme, setCurrentTheme] = useState<ColorScheme>(ColorSchemes.rose);
@@ -395,6 +407,14 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
     </SafeAreaView>
   );
 
+  if (!fontsLoaded) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#FFF" />
+      </View>
+    );
+  }
+
   return renderBackground(currentTheme.background, view);
 }
 
@@ -486,7 +506,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 4,
   },
   messageText: {
-    fontSize: 16,
+    fontSize: 19,
   },
   typingContainer: {
     flexDirection: 'row',
@@ -568,5 +588,11 @@ const styles = StyleSheet.create({
   },
   sendButtonDisabled: {
     backgroundColor: '#333',
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: '#000',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

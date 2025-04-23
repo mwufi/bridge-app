@@ -1,6 +1,8 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { ReactNode } from 'react';
 import { View, Image } from 'react-native';
+import { useFonts, Poppins_100Thin } from '@expo-google-fonts/poppins';
+import { EBGaramond_400Regular } from '@expo-google-fonts/eb-garamond';
 
 export type Color = {
     type: 'gradient' | 'solid' | 'image';
@@ -18,10 +20,12 @@ export type ColorScheme = {
     userBubble?: {
         background?: Color;
         foreground?: string;
+        fontFamily?: string;
     };
     assistantBubble?: {
         background?: Color;
         foreground?: string;
+        fontFamily?: string;
     };
     input?: {
         background?: string;
@@ -45,6 +49,7 @@ export const ColorSchemes: Record<string, ColorScheme> = {
                 value: { color: 'rgba(255, 255, 255, 0.1)' },
             },
             foreground: '#333333',
+            fontFamily: 'Poppins_100Thin',
         },
         assistantBubble: {
             background: {
@@ -52,6 +57,7 @@ export const ColorSchemes: Record<string, ColorScheme> = {
                 value: { color: 'transparent' },
             },
             foreground: 'black',
+            fontFamily: 'EBGaramond_400Regular',
         },
         input: {
             background: 'transparent',
@@ -70,6 +76,7 @@ export const ColorSchemes: Record<string, ColorScheme> = {
                 value: { color: '#FF3366' },
             },
             foreground: '#FFFFFF',
+            fontFamily: 'Poppins_100Thin',
         },
         assistantBubble: {
             background: {
@@ -77,6 +84,7 @@ export const ColorSchemes: Record<string, ColorScheme> = {
                 value: { color: '#1A1A1A' },
             },
             foreground: '#FFFFFF',
+            fontFamily: 'EBGaramond_400Regular',
         },
         input: {
             background: '#1A1A1A',

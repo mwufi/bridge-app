@@ -15,8 +15,13 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@expo-google-fonts/cormorant-garamond": "^0.3.0",
+    "@expo-google-fonts/eb-garamond": "^0.3.0",
     "@expo-google-fonts/fredoka": "^0.2.3",
+    "@expo-google-fonts/ingrid-darling": "^0.3.0",
     "@expo-google-fonts/outfit": "^0.2.3",
+    "@expo-google-fonts/playfair-display": "^0.3.0",
+    "@expo-google-fonts/poppins": "^0.3.0",
     "@expo-google-fonts/space-grotesk": "^0.2.3",
     "@expo/vector-icons": "^14.0.2",
     "@instantdb/react-native": "^0.18.1",

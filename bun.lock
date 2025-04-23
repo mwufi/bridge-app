@@ -4,8 +4,13 @@
     "": {
       "name": "my-app",
       "dependencies": {
+        "@expo-google-fonts/cormorant-garamond": "^0.3.0",
+        "@expo-google-fonts/eb-garamond": "^0.3.0",
         "@expo-google-fonts/fredoka": "^0.2.3",
+        "@expo-google-fonts/ingrid-darling": "^0.3.0",
         "@expo-google-fonts/outfit": "^0.2.3",
+        "@expo-google-fonts/playfair-display": "^0.3.0",
+        "@expo-google-fonts/poppins": "^0.3.0",
         "@expo-google-fonts/space-grotesk": "^0.2.3",
         "@expo/vector-icons": "^14.0.2",
         "@instantdb/react-native": "^0.18.1",
@@ -323,9 +328,19 @@
 
     "@egjs/hammerjs": ["@egjs/hammerjs@2.0.17", "", { "dependencies": { "@types/hammerjs": "^2.0.36" } }, "sha512-XQsZgjm2EcVUiZQf11UBJQfmZeEmOW8DpI1gsFeln6w0ae0ii4dMQEQ0kjl6DspdWX1aGY1/loyXnP0JS06e/A=="],
 
+    "@expo-google-fonts/cormorant-garamond": ["@expo-google-fonts/cormorant-garamond@0.3.0", "", {}, "sha512-Ulfqu5tHZfow8fRBu94YFn67DrbZ5edAJ4LX1e3aYEgMnIQtc8wWbABm2vPKkPYkqXdoyfUiaeSQFlNCP4Yciw=="],
+
+    "@expo-google-fonts/eb-garamond": ["@expo-google-fonts/eb-garamond@0.3.0", "", {}, "sha512-g7OhOWqPKgnrgE1Bo+QGaU1oqM7MEFrADt0L8wwvjNgWJe8ZaknrDoAzBLIGUh0PX0CDE0dnAqg00KW86R0WKg=="],
+
     "@expo-google-fonts/fredoka": ["@expo-google-fonts/fredoka@0.2.3", "", {}, "sha512-azCDc68yXQttagbSK7UIOS4gETX6MjtnyidoT7s+ly3Ffr5P1FL5y9qIGDqLlJms4lnjyZf23QjIRZ/vrWwzIA=="],
 
+    "@expo-google-fonts/ingrid-darling": ["@expo-google-fonts/ingrid-darling@0.3.0", "", {}, "sha512-GxnvDuobve07f2+LcXOrY49zpdCYENt4YplaLCx3HXljEJxd2HN8Af5l4ZrXexEZnxlxoWfdDWvNtJPWE8rz5Q=="],
+
     "@expo-google-fonts/outfit": ["@expo-google-fonts/outfit@0.2.3", "", {}, "sha512-uLW3n6WwtrF33IBDyuHKPgBNcJKe3O8+YXS1f7SLYdb5jEgXP2udNzzhmiw7OYvIAjfS+XDOw0uTELSB36VzOQ=="],
+
+    "@expo-google-fonts/playfair-display": ["@expo-google-fonts/playfair-display@0.3.0", "", {}, "sha512-vEea5RZdLoXMTwjowikk7MQzzuMg8fGTlDNj3IEzOfH1B3Rxp4YixfQrgQRY+9IsODLF2kwghdo4nre0WcfUWw=="],
+
+    "@expo-google-fonts/poppins": ["@expo-google-fonts/poppins@0.3.0", "", {}, "sha512-52hH328xotSgRUsceRxUeR+3s2CvBDYS9zJQGP+NjBcHT8ZcLz2x0JAKzTGkHNTEM7+Ab7dow9TBDuJ/9qp9YA=="],
 
     "@expo-google-fonts/space-grotesk": ["@expo-google-fonts/space-grotesk@0.2.3", "", {}, "sha512-UYEMIrzegR02pauH7gVMI7j6cUroTtJug6dH/aQFjMNz0UwZe6GUcrEtJDmsUHJjEZdxbYgHhaiIwswWVo0CMA=="],
 
