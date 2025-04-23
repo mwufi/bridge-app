@@ -11,6 +11,8 @@ import {
   TouchableOpacity,
   Animated,
   ActivityIndicator,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
@@ -23,6 +25,7 @@ import { id } from '@instantdb/react-native';
 import { API_URL } from '@/lib/config';
 import { ColorScheme, ColorSchemes, renderBackground } from '@/lib/theme';
 import { useCustomFonts } from '@/lib/fonts';
+import { ScrollToBottomButton } from './ScrollToBottomButton';
 const emptyStateImage = require('@/assets/images/empty-state.png');
 const defaultBotImage = require('@/assets/images/icon.png');
 
@@ -183,6 +186,7 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
   const [isTyping, setIsTyping] = useState(false);
   const [inputText, setInputText] = useState('');
   const flatListRef = useRef<FlatList>(null);
+  const [showScrollButton, setShowScrollButton] = useState(false);
 
   // Bot data based on the ID
   const botData = {
@@ -190,20 +194,19 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
     image: botInfo.image || defaultBotImage,
   };
 
-  // Scroll to bottom helper
-  const scrollToBottom = () => {
-    if (flatListRef.current) {
-      flatListRef.current.scrollToEnd({ animated: false });
-    }
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
+    const paddingToBottom = 20;
+    const isCloseToBottom = layoutMeasurement.height + contentOffset.y >=
+      contentSize.height - paddingToBottom;
+    setShowScrollButton(!isCloseToBottom);
   };
 
-  // Effect to scroll when typing indicator appears
-  useEffect(() => {
-    if (isTyping) {
-      // Small delay to ensure the footer is rendered
-      setTimeout(scrollToBottom, 100);
+  const scrollToBottom = () => {
+    if (flatListRef.current) {
+      flatListRef.current.scrollToEnd({ animated: true });
     }
-  }, [isTyping]);
+  };
 
   const EmptyChat = () => (
     <View style={styles.emptyContainer}>
@@ -339,26 +342,29 @@ export default function DarkChatScreen({ chatId = '1' }: ChatScreenProps) {
             maxToRenderPerBatch={10}
             windowSize={10}
             renderItem={renderItem}
-            contentContainerStyle={styles.messageList}
-            onContentSizeChange={scrollToBottom}
-            ListFooterComponent={isTyping ? (
-              <View style={styles.typingContainer}>
-                <Image
-                  source={botImageSource}
-                  style={styles.avatarImage}
-                  fadeDuration={0}
-                />
-                <View style={[styles.typingBubble, {
-                  backgroundColor: currentTheme.assistantBubble?.background?.value.color || '#1A1A1A'
-                }]}>
-                  <TypingIndicator />
-                </View>
-              </View>
-            ) : null}
+            contentContainerStyle={[styles.messageList, { paddingBottom: 0 }]}
+            contentInset={{ bottom: 24 }}
+            contentOffset={{ x: 0, y: 0 }}
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
+            onContentSizeChange={() => {
+              // When content size changes, scroll to bottom if we're already close to it
+              if (flatListRef.current && !showScrollButton) {
+                flatListRef.current.scrollToEnd({ animated: false });
+              }
+            }}
+            ListEmptyComponent={EmptyChat}
+            ListFooterComponent={isTyping ? <TypingIndicator /> : null}
           />
         ) : (
           <EmptyChat />
         )}
+
+        <ScrollToBottomButton
+          isVisible={showScrollButton}
+          onPress={scrollToBottom}
+          theme={currentTheme}
+        />
 
         {/* Input Container */}
         <View style={[styles.inputContainer, {
